@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WorkSaver Teacher Studio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>WorkSaver Teacher Studio</h1>
+        <p>Review, organize, and annotate scanned student work.</p>
+      </div>
+      <div class="summary" id="summary"></div>
+    </header>
+
+    <main>
+      <section class="controls">
+        <h2>Organize gallery</h2>
+        <div class="button-row" id="sortButtons">
+          <button data-sort="student" class="active">By Student</button>
+          <button data-sort="assignment">By Assignment</button>
+          <button data-sort="topic">By Math Topic</button>
+          <button data-sort="standard">By Common Core Standard</button>
+        </div>
+        <label class="shuffle-toggle">
+          <input type="checkbox" id="shuffleToggle" />
+          Shuffle order inside each group
+        </label>
+      </section>
+
+      <section id="gallery" class="gallery"></section>
+    </main>
+
+    <dialog id="focusModal" class="focus-modal">
+      <article>
+        <button id="closeModal" class="close">✕</button>
+        <div class="focus-layout">
+          <div class="image-panel">
+            <div id="imageCanvas" class="image-canvas">
+              <img id="focusImage" alt="Student work" />
+              <div id="annotationLayer" class="annotation-layer"></div>
+            </div>
+          </div>
+          <div class="tools-panel">
+            <h3>Metadata editor</h3>
+            <form id="metaForm" class="meta-form">
+              <label>
+                Student
+                <input name="student" required />
+              </label>
+              <label>
+                Assignment
+                <input name="assignment" required />
+              </label>
+              <label>
+                Math topic
+                <input name="topic" required />
+              </label>
+              <label>
+                Common Core
+                <input name="standard" required />
+              </label>
+              <label>
+                Captured at
+                <input name="capturedAt" type="datetime-local" required />
+              </label>
+              <button type="submit">Save metadata</button>
+            </form>
+
+            <h3>Annotation tools</h3>
+            <div class="tool-buttons">
+              <button id="highlightTool" type="button">Highlighter</button>
+              <button id="stickerGood" type="button">Sticker: Good Work</button>
+              <button id="stickerMisconception" type="button">Sticker: Misconception</button>
+              <button id="clearAnnotations" type="button" class="secondary">Clear Annotations</button>
+            </div>
+            <p class="hint">
+              Use the highlighter by clicking and dragging on the image. For stickers, choose a sticker then click where you want to place it.
+            </p>
+          </div>
+        </div>
+      </article>
+    </dialog>
+
+    <template id="cardTemplate">
+      <article class="work-card">
+        <button class="card-button">
+          <img alt="student submission thumbnail" />
+          <div class="card-details">
+            <h4 class="student"></h4>
+            <p class="assignment"></p>
+            <p class="topic"></p>
+            <p class="standard"></p>
+            <p class="date"></p>
+          </div>
+        </button>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
