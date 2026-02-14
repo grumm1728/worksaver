@@ -1,2 +1,21 @@
-# worksaver
-an app that would save and organize photos of student work for a teacher
+# WorkSaver
+
+A prototype teacher web interface for reviewing and organizing photos/videos of student work.
+
+## Features
+
+- Gallery of AI-organized captures with dummy data.
+- Grouping controls: student, assignment, math topic, and Common Core standard.
+- Optional shuffle inside each group.
+- Focus mode for a single capture with editable metadata.
+- Annotation tools in focus mode:
+  - Highlighter rectangles
+  - Sticker tags for "Good Work Example" and "Misconception to Watch"
+
+## Run locally
+
+```bash
+python3 -m http.server 4173
+```
+
+Then open <http://localhost:4173>.
