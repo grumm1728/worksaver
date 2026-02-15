@@ -5,6 +5,7 @@ A prototype teacher web interface for reviewing and organizing photos/videos of 
 ## Features
 
 - Cluster-map overview that places work-sample groups on a 2D plane.
+- Seeded with a larger dataset: provided local `photo *.JPG` samples plus 20 additional dummy captures for testing scale.
 - Click-to-zoom workflow: open a cluster to view that group's thumbnails in organized rows, then zoom back out.
 - Grouping controls: student, assignment, math topic, and Common Core standard.
 - Optional shuffle inside each group.

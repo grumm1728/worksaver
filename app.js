@@ -1,65 +1,65 @@
-const scans = [
-  {
-    id: crypto.randomUUID(),
-    imageUrl: 'https://images.unsplash.com/photo-1453738773917-9c3eff1db985?auto=format&fit=crop&w=1200&q=80',
-    student: 'Ava Thompson',
-    assignment: 'Fractions Exit Ticket',
-    topic: 'Equivalent Fractions',
-    standard: 'CCSS.MATH.CONTENT.4.NF.A.1',
-    capturedAt: '2026-02-02T09:12',
-    annotations: []
-  },
-  {
-    id: crypto.randomUUID(),
-    imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80',
-    student: 'Liam Chen',
-    assignment: 'Number Talk Whiteboard',
-    topic: 'Place Value',
-    standard: 'CCSS.MATH.CONTENT.3.NBT.A.1',
-    capturedAt: '2026-02-02T10:01',
-    annotations: []
-  },
-  {
-    id: crypto.randomUUID(),
-    imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80',
-    student: 'Ava Thompson',
-    assignment: 'Multiplication Strategy Check',
-    topic: 'Area Models',
-    standard: 'CCSS.MATH.CONTENT.4.NBT.B.5',
-    capturedAt: '2026-02-03T08:44',
-    annotations: []
-  },
-  {
-    id: crypto.randomUUID(),
-    imageUrl: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1200&q=80',
-    student: 'Noah Rivera',
-    assignment: 'Word Problem Journal',
-    topic: 'Two-Step Problems',
-    standard: 'CCSS.MATH.CONTENT.3.OA.D.8',
-    capturedAt: '2026-02-03T11:22',
-    annotations: []
-  },
-  {
-    id: crypto.randomUUID(),
-    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
-    student: 'Mia Patel',
-    assignment: 'Geometry Board Model',
-    topic: 'Classifying Shapes',
-    standard: 'CCSS.MATH.CONTENT.5.G.B.3',
-    capturedAt: '2026-02-04T09:36',
-    annotations: []
-  },
-  {
-    id: crypto.randomUUID(),
-    imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80',
-    student: 'Liam Chen',
-    assignment: 'Student Explanation Video',
-    topic: 'Comparing Decimals',
-    standard: 'CCSS.MATH.CONTENT.5.NBT.A.3',
-    capturedAt: '2026-02-04T13:18',
-    annotations: []
-  }
+const providedWorkSampleFiles = [
+  'photo 1.JPG',
+  'photo 1a.JPG',
+  'photo 1b.JPG',
+  'photo 2.JPG',
+  'photo 2a.JPG',
+  'photo 2b.JPG',
+  'photo 3.JPG',
+  'photo 3a.JPG',
+  'photo 3b.JPG',
+  'photo 4.JPG',
+  'photo 4a.JPG',
+  'photo 5.JPG',
+  'photo 5a.JPG'
 ];
+
+const dummyWorkSamples = Array.from({ length: 20 }, (_, index) => `https://picsum.photos/seed/worksaver-dummy-${index + 1}/1400/980`);
+
+const roster = [
+  'Ava Thompson',
+  'Liam Chen',
+  'Noah Rivera',
+  'Mia Patel',
+  'Sophia Martinez',
+  'Ethan Brooks',
+  'Olivia Green',
+  'Lucas Adams'
+];
+
+const assignments = [
+  'Skyline Express Poster',
+  'Train Pattern Investigation',
+  'Length Combination Proof',
+  'Group Reflection Board',
+  'Reasoning Write-Up',
+  'Algebraic Thinking Summary'
+];
+
+const topics = ['Patterns', 'Combinatorics', 'Expressions', 'Reasoning & Proof'];
+const standards = ['CCSS.MATH.CONTENT.5.OA.B.3', 'CCSS.MATH.CONTENT.6.EE.A.2', 'CCSS.MATH.PRACTICE.MP3'];
+
+function buildScan(imageUrl, index, sourceLabel) {
+  const baseDate = new Date('2026-02-01T08:00:00');
+  baseDate.setHours(baseDate.getHours() + index * 3);
+
+  return {
+    id: crypto.randomUUID(),
+    imageUrl,
+    fallbackImageUrl: `https://picsum.photos/seed/worksaver-fallback-${index + 1}/1400/980`,
+    student: roster[index % roster.length],
+    assignment: `${assignments[index % assignments.length]}${sourceLabel ? ` (${sourceLabel})` : ''}`,
+    topic: topics[index % topics.length],
+    standard: standards[index % standards.length],
+    capturedAt: baseDate.toISOString().slice(0, 16),
+    annotations: []
+  };
+}
+
+const providedScans = providedWorkSampleFiles.map((fileName, index) => buildScan(fileName, index, 'provided sample'));
+const dummyScans = dummyWorkSamples.map((imageUrl, index) => buildScan(imageUrl, index + providedScans.length, 'dummy sample'));
+
+const scans = [...providedScans, ...dummyScans];
 
 const labels = {
   student: 'Student',
@@ -97,6 +97,15 @@ const highlightTool = document.getElementById('highlightTool');
 const stickerGood = document.getElementById('stickerGood');
 const stickerMisconception = document.getElementById('stickerMisconception');
 const clearAnnotations = document.getElementById('clearAnnotations');
+
+function setImageSource(imageElement, scan) {
+  imageElement.src = scan.imageUrl;
+  imageElement.onerror = () => {
+    if (scan.fallbackImageUrl && imageElement.src !== scan.fallbackImageUrl) {
+      imageElement.src = scan.fallbackImageUrl;
+    }
+  };
+}
 
 function shuffleCopy(items) {
   const copy = [...items];
@@ -156,7 +165,7 @@ function renderClusterPlane(groups) {
     preview.className = 'cluster-preview';
     orderedItems(items).slice(0, 4).forEach((scan, previewIndex) => {
       const thumb = document.createElement('img');
-      thumb.src = scan.imageUrl;
+      setImageSource(thumb, scan);
       thumb.alt = `${scan.student} ${scan.assignment}`;
       thumb.style.setProperty('--stack-offset', `${previewIndex * 8}px`);
       preview.appendChild(thumb);
@@ -198,7 +207,7 @@ function renderRows(groups) {
   orderedItems(items).forEach((scan) => {
     const card = template.content.firstElementChild.cloneNode(true);
     const button = card.querySelector('.card-button');
-    card.querySelector('img').src = scan.imageUrl;
+    setImageSource(card.querySelector('img'), scan);
     card.querySelector('.student').textContent = scan.student;
     card.querySelector('.assignment').textContent = scan.assignment;
     card.querySelector('.topic').textContent = scan.topic;
@@ -274,7 +283,7 @@ function openFocus(scanId) {
   const scan = selectedScan();
   if (!scan) return;
 
-  focusImage.src = scan.imageUrl;
+  setImageSource(focusImage, scan);
   metaForm.student.value = scan.student;
   metaForm.assignment.value = scan.assignment;
   metaForm.topic.value = scan.topic;
