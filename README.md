@@ -4,7 +4,8 @@ A prototype teacher web interface for reviewing and organizing photos/videos of 
 
 ## Features
 
-- Gallery of AI-organized captures with dummy data.
+- Cluster-map overview that places work-sample groups on a 2D plane.
+- Click-to-zoom workflow: open a cluster to view that group's thumbnails in organized rows, then zoom back out.
 - Grouping controls: student, assignment, math topic, and Common Core standard.
 - Optional shuffle inside each group.
 - Focus mode for a single capture with editable metadata.

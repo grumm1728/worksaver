@@ -30,7 +30,13 @@
         </label>
       </section>
 
-      <section id="gallery" class="gallery"></section>
+      <section class="view-controls">
+        <p id="viewHint">Cluster map view: click a cluster to zoom into row view.</p>
+        <button id="zoomOutButton" type="button" class="secondary" hidden>← Zoom out to all clusters</button>
+      </section>
+
+      <section id="clusterPlane" class="cluster-plane"></section>
+      <section id="gallery" class="gallery" hidden></section>
     </main>
 
     <dialog id="focusModal" class="focus-modal">

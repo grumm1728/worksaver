@@ -73,12 +73,17 @@ const state = {
   shuffle: false,
   selectedId: null,
   tool: null,
-  drawing: null
+  drawing: null,
+  viewMode: 'plane',
+  activeCluster: null
 };
 
 const sortButtons = document.getElementById('sortButtons');
 const gallery = document.getElementById('gallery');
+const clusterPlane = document.getElementById('clusterPlane');
 const summary = document.getElementById('summary');
+const viewHint = document.getElementById('viewHint');
+const zoomOutButton = document.getElementById('zoomOutButton');
 const shuffleToggle = document.getElementById('shuffleToggle');
 const template = document.getElementById('cardTemplate');
 const focusModal = document.getElementById('focusModal');
@@ -112,42 +117,118 @@ function groupScans() {
   return [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b));
 }
 
-function updateSummary() {
-  const groups = new Set(scans.map((scan) => scan[state.sortKey]));
-  summary.textContent = `${scans.length} captures · ${groups.size} ${labels[state.sortKey].toLowerCase()} groups`;
+function orderedItems(items) {
+  return state.shuffle ? shuffleCopy(items) : [...items].sort((a, b) => new Date(b.capturedAt) - new Date(a.capturedAt));
 }
 
-function renderGallery() {
-  gallery.textContent = '';
-  updateSummary();
+function updateSummary(groups) {
+  summary.textContent = `${scans.length} captures · ${groups.length} ${labels[state.sortKey].toLowerCase()} clusters`;
+}
 
-  groupScans().forEach(([groupName, items]) => {
-    const section = document.createElement('section');
-    section.className = 'group';
-    const title = document.createElement('h3');
-    title.textContent = `${labels[state.sortKey]}: ${groupName}`;
+function updateViewControls() {
+  const isRows = state.viewMode === 'rows';
+  zoomOutButton.hidden = !isRows;
+  clusterPlane.hidden = isRows;
+  gallery.hidden = !isRows;
+  viewHint.textContent = isRows
+    ? `Zoomed into ${labels[state.sortKey].toLowerCase()} cluster: ${state.activeCluster}`
+    : 'Cluster map view: click a cluster to zoom into row view.';
+}
 
-    const grid = document.createElement('div');
-    grid.className = 'group-grid';
+function renderClusterPlane(groups) {
+  clusterPlane.textContent = '';
+  const count = groups.length;
 
-    const workingItems = state.shuffle ? shuffleCopy(items) : [...items].sort((a, b) => new Date(b.capturedAt) - new Date(a.capturedAt));
-    workingItems.forEach((scan) => {
-      const card = template.content.firstElementChild.cloneNode(true);
-      const button = card.querySelector('.card-button');
-      card.querySelector('img').src = scan.imageUrl;
-      card.querySelector('.student').textContent = scan.student;
-      card.querySelector('.assignment').textContent = scan.assignment;
-      card.querySelector('.topic').textContent = scan.topic;
-      card.querySelector('.standard').textContent = scan.standard;
-      card.querySelector('.date').textContent = new Date(scan.capturedAt).toLocaleString();
+  groups.forEach(([groupName, items], index) => {
+    const angle = (index / Math.max(1, count)) * Math.PI * 2;
+    const radius = count === 1 ? 0 : 31;
+    const x = 50 + Math.cos(angle) * radius;
+    const y = 50 + Math.sin(angle) * radius;
 
-      button.addEventListener('click', () => openFocus(scan.id));
-      grid.appendChild(card);
+    const clusterButton = document.createElement('button');
+    clusterButton.type = 'button';
+    clusterButton.className = 'cluster';
+    clusterButton.style.left = `${x}%`;
+    clusterButton.style.top = `${y}%`;
+    clusterButton.setAttribute('aria-label', `Open ${groupName} cluster`);
+
+    const preview = document.createElement('div');
+    preview.className = 'cluster-preview';
+    orderedItems(items).slice(0, 4).forEach((scan, previewIndex) => {
+      const thumb = document.createElement('img');
+      thumb.src = scan.imageUrl;
+      thumb.alt = `${scan.student} ${scan.assignment}`;
+      thumb.style.setProperty('--stack-offset', `${previewIndex * 8}px`);
+      preview.appendChild(thumb);
     });
 
-    section.append(title, grid);
-    gallery.appendChild(section);
+    const title = document.createElement('h3');
+    title.textContent = groupName;
+    const meta = document.createElement('p');
+    meta.textContent = `${items.length} work samples`;
+
+    clusterButton.append(preview, title, meta);
+    clusterButton.addEventListener('click', () => {
+      state.viewMode = 'rows';
+      state.activeCluster = groupName;
+      render();
+    });
+
+    clusterPlane.appendChild(clusterButton);
   });
+}
+
+function renderRows(groups) {
+  gallery.textContent = '';
+  const activeGroup = groups.find(([groupName]) => groupName === state.activeCluster) || groups[0];
+  if (!activeGroup) return;
+
+  const [groupName, items] = activeGroup;
+  state.activeCluster = groupName;
+
+  const section = document.createElement('section');
+  section.className = 'group';
+
+  const title = document.createElement('h3');
+  title.textContent = `${labels[state.sortKey]}: ${groupName}`;
+
+  const grid = document.createElement('div');
+  grid.className = 'group-grid';
+
+  orderedItems(items).forEach((scan) => {
+    const card = template.content.firstElementChild.cloneNode(true);
+    const button = card.querySelector('.card-button');
+    card.querySelector('img').src = scan.imageUrl;
+    card.querySelector('.student').textContent = scan.student;
+    card.querySelector('.assignment').textContent = scan.assignment;
+    card.querySelector('.topic').textContent = scan.topic;
+    card.querySelector('.standard').textContent = scan.standard;
+    card.querySelector('.date').textContent = new Date(scan.capturedAt).toLocaleString();
+
+    button.addEventListener('click', () => openFocus(scan.id));
+    grid.appendChild(card);
+  });
+
+  section.append(title, grid);
+  gallery.appendChild(section);
+}
+
+function render() {
+  const groups = groupScans();
+  updateSummary(groups);
+  if (!groups.length) {
+    clusterPlane.textContent = 'No captures available.';
+    gallery.textContent = '';
+    return;
+  }
+
+  if (state.viewMode === 'rows' && !groups.some(([groupName]) => groupName === state.activeCluster)) {
+    state.activeCluster = groups[0][0];
+  }
+
+  renderClusterPlane(groups);
+  renderRows(groups);
+  updateViewControls();
 }
 
 function setActiveTool(toolName) {
@@ -208,13 +289,21 @@ sortButtons.addEventListener('click', (event) => {
   const button = event.target.closest('button[data-sort]');
   if (!button) return;
   state.sortKey = button.dataset.sort;
+  state.viewMode = 'plane';
+  state.activeCluster = null;
   [...sortButtons.querySelectorAll('button')].forEach((btn) => btn.classList.toggle('active', btn === button));
-  renderGallery();
+  render();
 });
 
 shuffleToggle.addEventListener('change', () => {
   state.shuffle = shuffleToggle.checked;
-  renderGallery();
+  render();
+});
+
+zoomOutButton.addEventListener('click', () => {
+  state.viewMode = 'plane';
+  state.activeCluster = null;
+  render();
 });
 
 closeModal.addEventListener('click', () => focusModal.close());
@@ -231,7 +320,7 @@ metaForm.addEventListener('submit', (event) => {
   scan.standard = formData.get('standard');
   scan.capturedAt = formData.get('capturedAt');
 
-  renderGallery();
+  render();
 });
 
 highlightTool.addEventListener('click', () => setActiveTool('highlight'));
@@ -289,4 +378,4 @@ imageCanvas.addEventListener('pointerup', (event) => {
   state.drawing = null;
 });
 
-renderGallery();
+render();

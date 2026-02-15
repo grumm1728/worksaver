@@ -87,6 +87,72 @@ button.secondary {
   color: #475569;
 }
 
+.view-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  color: #475569;
+}
+
+.view-controls p {
+  margin: 0;
+}
+
+.cluster-plane {
+  background: radial-gradient(circle at center, #f8fbff, #eef3fb);
+  border: 1px solid #dbe1ed;
+  border-radius: 14px;
+  min-height: 64vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.cluster {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 210px;
+  padding: 0.6rem;
+  border: 1px solid #bdd1f7;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.95);
+  box-shadow: 0 6px 18px rgb(15 23 42 / 0.08);
+  text-align: left;
+}
+
+.cluster h3,
+.cluster p {
+  margin: 0;
+}
+
+.cluster h3 {
+  font-size: 0.9rem;
+}
+
+.cluster p {
+  margin-top: 0.2rem;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.cluster-preview {
+  position: relative;
+  height: 62px;
+  margin-bottom: 0.55rem;
+}
+
+.cluster-preview img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #dbe1ed;
+  position: absolute;
+  left: var(--stack-offset);
+  top: 0;
+  box-shadow: 0 2px 5px rgb(15 23 42 / 0.14);
+}
+
 .gallery {
   display: grid;
   gap: 1rem;
@@ -267,5 +333,13 @@ button.secondary {
 
   .image-canvas {
     min-height: 360px;
+  }
+
+  .cluster-plane {
+    min-height: 88vh;
+  }
+
+  .cluster {
+    width: 180px;
   }
 }
