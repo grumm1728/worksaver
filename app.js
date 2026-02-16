@@ -1,96 +1,65 @@
-const providedWorkSampleFiles = [
-  'photo 1.JPG',
-  'photo 1a.JPG',
-  'photo 1b.JPG',
-  'photo 2.JPG',
-  'photo 2a.JPG',
-  'photo 2b.JPG',
-  'photo 3.JPG',
-  'photo 3a.JPG',
-  'photo 3b.JPG',
-  'photo 4.JPG',
-  'photo 4a.JPG',
-  'photo 5.JPG',
-  'photo 5a.JPG'
-];
-
-const dummyWorkSamples = Array.from({ length: 20 }, (_, index) => `https://picsum.photos/seed/worksaver-dummy-${index + 1}/1400/980`);
-
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-const roster = ['Ava Thompson', 'Liam Chen', 'Noah Rivera', 'Mia Patel', 'Sophia Martinez', 'Ethan Brooks', 'Olivia Green', 'Lucas Adams'];
-=======
-const roster = [
-  'Ava Thompson',
-  'Liam Chen',
-  'Noah Rivera',
-  'Mia Patel',
-  'Sophia Martinez',
-  'Ethan Brooks',
-  'Olivia Green',
-  'Lucas Adams'
-];
->>>>>>> main
-
-const assignments = [
-  'Skyline Express Poster',
-  'Train Pattern Investigation',
-  'Length Combination Proof',
-  'Group Reflection Board',
-  'Reasoning Write-Up',
-  'Algebraic Thinking Summary'
-];
-
-const topics = ['Patterns', 'Combinatorics', 'Expressions', 'Reasoning & Proof'];
-const standards = ['CCSS.MATH.CONTENT.5.OA.B.3', 'CCSS.MATH.CONTENT.6.EE.A.2', 'CCSS.MATH.PRACTICE.MP3'];
-
-function buildScan(imageUrl, index, sourceLabel) {
-  const baseDate = new Date();
-  baseDate.setHours(baseDate.getHours() - index * 36);
-
-  return {
-    id: crypto.randomUUID(),
-    imageUrl,
-    fallbackImageUrl: `https://picsum.photos/seed/worksaver-fallback-${index + 1}/1400/980`,
-    student: roster[index % roster.length],
-    assignment: `${assignments[index % assignments.length]}${sourceLabel ? ` (${sourceLabel})` : ''}`,
-    topic: topics[index % topics.length],
-    standard: standards[index % standards.length],
-    capturedAt: baseDate.toISOString().slice(0, 16),
-    annotations: []
-  };
-}
-
-const providedScans = providedWorkSampleFiles.map((fileName, index) => buildScan(fileName, index, 'provided sample'));
-const dummyScans = dummyWorkSamples.map((imageUrl, index) => buildScan(imageUrl, index + providedScans.length, 'dummy sample'));
-const scans = [...providedScans, ...dummyScans];
+const misconceptionTemplates = {
+  'Place value confusion': 'Use base-ten blocks and compare two worked examples to reinforce quantity meaning.',
+  'Regrouping error': 'Pull a small group for a quick re-teach with number-bond regrouping steps.',
+  "Didn't show work": 'Model sentence frames and require one equation + one explanation line before checking answers.',
+  'Great strategy': 'Use this work as a peer exemplar and ask the student to explain the strategy aloud.',
+  'Answer-only': 'Prompt students to annotate each step and highlight where each number came from.'
+};
 
 const labels = {
-  student: 'Student',
+  misconception: 'Misconception',
+  lessonObjective: 'Lesson / Objective',
+  standard: 'Standard',
   assignment: 'Assignment',
-  topic: 'Math Topic',
-  standard: 'Common Core'
+  student: 'Student'
 };
+
+const tourSteps = [
+  'Click “Load Demo Class (200 samples)”.',
+  'In cluster view, click a cluster to open its samples.',
+  'Place the “Regrouping error” sticker on 3 samples.',
+  'Observe “Instructional insights” updating.',
+  'Click “Create small group”.'
+];
 
 const state = {
-  sortKey: 'student',
+  scans: [],
+  sortKey: 'misconception',
   shuffle: false,
   selectedId: null,
-  tool: null,
-  drawing: null,
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-=======
-  viewMode: 'plane',
->>>>>>> main
-  activeCluster: null
+  activeCluster: null,
+  activeSticker: null,
+  tagHistory: [],
+  demoLoaded: false,
+  tourCompleted: [false, false, false, false, false],
+  tourActiveIndex: 0,
+  smallGroupCreated: false
 };
 
-const sortButtons = document.getElementById('sortButtons');
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-const clusterPlane = document.getElementById('clusterPlane');
+const loadDemoBtn = document.getElementById('loadDemoBtn');
+const tryDemoBtn = document.getElementById('tryDemoBtn');
+const resetBtn = document.getElementById('resetBtn');
+const groupBySelect = document.getElementById('groupBySelect');
+const shuffleToggle = document.getElementById('shuffleToggle');
 const summary = document.getElementById('summary');
 const viewHint = document.getElementById('viewHint');
-const shuffleToggle = document.getElementById('shuffleToggle');
+const viewControls = document.getElementById('viewControls');
+const emptyState = document.getElementById('emptyState');
+const sidePanels = document.getElementById('sidePanels');
+const clusterPlane = document.getElementById('clusterPlane');
 const template = document.getElementById('cardTemplate');
+
+const tourChecklist = document.getElementById('tourChecklist');
+const tourNext = document.getElementById('tourNext');
+const tourSkip = document.getElementById('tourSkip');
+
+const insightTop = document.getElementById('insightTop');
+const insightMove = document.getElementById('insightMove');
+const insightStudents = document.getElementById('insightStudents');
+const insightGroup = document.getElementById('insightGroup');
+const createSmallGroupBtn = document.getElementById('createSmallGroupBtn');
+const exportGroupCsv = document.getElementById('exportGroupCsv');
+const reteachNote = document.getElementById('reteachNote');
 
 const groupModal = document.getElementById('groupModal');
 const closeGroupModal = document.getElementById('closeGroupModal');
@@ -98,26 +67,29 @@ const groupModalTitle = document.getElementById('groupModalTitle');
 const groupModalMeta = document.getElementById('groupModalMeta');
 const groupGallery = document.getElementById('groupGallery');
 
-=======
-const gallery = document.getElementById('gallery');
-const clusterPlane = document.getElementById('clusterPlane');
-const summary = document.getElementById('summary');
-const viewHint = document.getElementById('viewHint');
-const zoomOutButton = document.getElementById('zoomOutButton');
-const shuffleToggle = document.getElementById('shuffleToggle');
-const template = document.getElementById('cardTemplate');
->>>>>>> main
 const focusModal = document.getElementById('focusModal');
 const closeModal = document.getElementById('closeModal');
 const focusImage = document.getElementById('focusImage');
 const annotationLayer = document.getElementById('annotationLayer');
 const metaForm = document.getElementById('metaForm');
 const imageCanvas = document.getElementById('imageCanvas');
+const stickerButtons = document.getElementById('stickerButtons');
+const undoTag = document.getElementById('undoTag');
+const toast = document.getElementById('toast');
 
-const highlightTool = document.getElementById('highlightTool');
-const stickerGood = document.getElementById('stickerGood');
-const stickerMisconception = document.getElementById('stickerMisconception');
-const clearAnnotations = document.getElementById('clearAnnotations');
+function on(element, eventName, handler) {
+  if (element) element.addEventListener(eventName, handler);
+}
+
+function showToast(message) {
+  if (!toast) return;
+  toast.textContent = message;
+  toast.hidden = false;
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => {
+    toast.hidden = true;
+  }, 1200);
+}
 
 function setImageSource(imageElement, scan) {
   imageElement.src = scan.imageUrl;
@@ -137,123 +109,142 @@ function shuffleCopy(items) {
   return copy;
 }
 
-function groupScans() {
-  const grouped = new Map();
-  scans.forEach((scan) => {
-    const key = scan[state.sortKey];
-    if (!grouped.has(key)) grouped.set(key, []);
-    grouped.get(key).push(scan);
-  });
-  return [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b));
+function selectedScan() {
+  return state.scans.find((scan) => scan.id === state.selectedId);
 }
 
 function orderedItems(items) {
   return state.shuffle ? shuffleCopy(items) : [...items].sort((a, b) => new Date(b.capturedAt) - new Date(a.capturedAt));
 }
 
-function updateSummary(groups) {
-  summary.textContent = `${scans.length} captures · ${groups.length} ${labels[state.sortKey].toLowerCase()} groups`;
+function primaryMisconception(scan) {
+  const tags = (scan.annotations || []).filter((item) => item.type === 'tag').map((item) => item.category).filter((name) => name !== 'Great strategy');
+  return tags[0] || 'Untagged';
 }
 
-function updateViewControls() {
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-  if (state.sortKey === 'student') {
-    viewHint.textContent = 'Student board view: alphabetic grid with workload indicators. Click any tile to open its work in a modal.';
-=======
-  const isRows = state.viewMode === 'rows';
-  zoomOutButton.hidden = !isRows;
-  clusterPlane.hidden = isRows;
-  gallery.hidden = !isRows;
+function groupValue(scan) {
+  if (state.sortKey === 'misconception') return primaryMisconception(scan);
+  return scan[state.sortKey] || 'Unknown';
+}
 
-  if (isRows) {
-    viewHint.textContent = `Zoomed into ${labels[state.sortKey].toLowerCase()} group: ${state.activeCluster}`;
-    return;
+function groupScans() {
+  const grouped = new Map();
+  state.scans.forEach((scan) => {
+    const key = groupValue(scan);
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(scan);
+  });
+  return [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b));
+}
+
+function currentSetForInsights() {
+  if (groupModal.open && state.activeCluster) {
+    const group = groupScans().find(([name]) => name === state.activeCluster);
+    if (group) return group[1];
   }
+  return state.scans;
+}
 
-  if (state.sortKey === 'student') {
-    viewHint.textContent = 'Student board view: alphabetic grid with workload indicators.';
->>>>>>> main
-    return;
+function setTourStepComplete(index, value = true) {
+  state.tourCompleted[index] = value;
+  renderTour();
+}
+
+function renderTour() {
+  if (!tourChecklist) return;
+  tourChecklist.textContent = '';
+  tourSteps.forEach((step, index) => {
+    const item = document.createElement('li');
+    item.className = index === state.tourActiveIndex ? 'active' : '';
+    item.innerHTML = `${state.tourCompleted[index] ? '✅' : '⬜'} ${step}`;
+    tourChecklist.appendChild(item);
+  });
+}
+
+function nextTourStep() {
+  const nextIndex = state.tourCompleted.findIndex((done, idx) => !done && idx > state.tourActiveIndex);
+  if (nextIndex !== -1) {
+    state.tourActiveIndex = nextIndex;
   }
+  renderTour();
+}
 
-  if (state.sortKey === 'assignment') {
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-    viewHint.textContent = 'Assignment timeline view: today, 1-7 days, 8-30 days, and school-year archive. Click any assignment to open its work in a modal.';
-    return;
-  }
+function updateTourFromState() {
+  if (state.demoLoaded) setTourStepComplete(0);
+  if (groupModal.open) setTourStepComplete(1);
 
-  viewHint.textContent = 'Concept map view: k-means style clusters by topic/standard. Click any concept to open its work in a modal.';
-=======
-    viewHint.textContent = 'Assignment timeline view: today, 1-7 days, 8-30 days, and school-year archive.';
-    return;
-  }
+  const regroupingCount = state.scans.flatMap((scan) => scan.annotations || []).filter((item) => item.type === 'tag' && item.category === 'Regrouping error').length;
+  if (regroupingCount >= 3) setTourStepComplete(2);
 
-  viewHint.textContent = 'Concept map view: k-means style clusters by topic/standard.';
->>>>>>> main
+  const totalMisconceptions = state.scans.flatMap((scan) => scan.annotations || []).filter((item) => item.type === 'tag' && item.category !== 'Great strategy').length;
+  if (totalMisconceptions > 0) setTourStepComplete(3);
+
+  if (state.smallGroupCreated) setTourStepComplete(4);
+}
+
+function updateHeaderAndEmptyState(groups) {
+  const hasData = state.scans.length > 0;
+  emptyState.hidden = hasData;
+  viewControls.hidden = !hasData;
+  sidePanels.hidden = !hasData;
+  clusterPlane.hidden = !hasData;
+  summary.textContent = hasData ? `${state.scans.length} captures · ${groups.length} ${labels[state.sortKey].toLowerCase()} groups` : 'No class set loaded yet.';
+}
+
+function updateViewHint() {
+  const text = {
+    student: 'Student board view: alphabetic grid with workload indicators. Click any student to review and tag.',
+    assignment: 'Assignment timeline: click a lane chip to open that assignment set.',
+    lessonObjective: 'Lesson objective clusters: open a group and tag misconceptions to inform next steps.',
+    standard: 'Standard clusters: identify where errors concentrate by standard.',
+    misconception: 'Misconception clusters: quickly review tagged work and form targeted small groups.'
+  };
+  viewHint.textContent = text[state.sortKey];
 }
 
 function applyBackdropTheme() {
   clusterPlane.classList.remove('theme-bulletin', 'theme-desk', 'theme-chalkboard');
-  if (state.sortKey === 'student') {
-    clusterPlane.classList.add('theme-bulletin');
-  } else if (state.sortKey === 'assignment') {
-    clusterPlane.classList.add('theme-desk');
-  } else {
-    clusterPlane.classList.add('theme-chalkboard');
-  }
+  if (state.sortKey === 'student') clusterPlane.classList.add('theme-bulletin');
+  else if (state.sortKey === 'assignment') clusterPlane.classList.add('theme-desk');
+  else clusterPlane.classList.add('theme-chalkboard');
 }
 
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
 function openGroupModal(groupName) {
   state.activeCluster = groupName;
   renderGroupModal();
   groupModal.showModal();
+  updateTourFromState();
 }
 
-=======
->>>>>>> main
 function renderStudentGrid(groups) {
   clusterPlane.innerHTML = '';
   clusterPlane.classList.add('student-grid-view');
 
-  groups.forEach(([groupName, items]) => {
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'student-tile';
-    card.setAttribute('aria-label', `Open ${groupName}`);
+  const sorted = [...groups].sort(([a], [b]) => a.localeCompare(b));
+  const maxCount = Math.max(1, ...sorted.map(([, items]) => items.length));
+
+  sorted.forEach(([groupName, items]) => {
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'student-tile';
 
     const name = document.createElement('h3');
     name.textContent = groupName;
-
     const count = document.createElement('p');
-    count.textContent = `${items.length} work samples`;
+    count.textContent = `${items.length} samples`;
 
     const meter = document.createElement('div');
     meter.className = 'sample-meter';
-    const maxBars = Math.min(10, Math.max(...groups.map(([, groupItems]) => groupItems.length)));
-    const activeBars = Math.max(1, Math.round((items.length / maxBars) * 10));
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-
-=======
->>>>>>> main
+    const activeBars = Math.max(1, Math.round((items.length / maxCount) * 10));
     for (let i = 0; i < 10; i += 1) {
-      const dot = document.createElement('span');
-      dot.className = i < activeBars ? 'on' : '';
-      meter.appendChild(dot);
+      const bar = document.createElement('span');
+      bar.className = i < activeBars ? 'on' : '';
+      meter.appendChild(bar);
     }
 
-    card.append(name, count, meter);
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-    card.addEventListener('click', () => openGroupModal(groupName));
-=======
-    card.addEventListener('click', () => {
-      state.viewMode = 'rows';
-      state.activeCluster = groupName;
-      render();
-    });
-
->>>>>>> main
-    clusterPlane.appendChild(card);
+    tile.append(name, count, meter);
+    tile.addEventListener('click', () => openGroupModal(groupName));
+    clusterPlane.appendChild(tile);
   });
 }
 
@@ -268,58 +259,39 @@ function renderAssignmentTimeline(groups) {
   clusterPlane.innerHTML = '';
   clusterPlane.classList.add('assignment-timeline-view');
 
-  const timelineOrder = ['Today', '1-7 days ago', '8-30 days ago', '31+ days ago (school year)'];
-  const lanes = new Map(timelineOrder.map((label) => [label, []]));
+  const laneLabels = ['Today', '1-7 days ago', '8-30 days ago', '31+ days ago (school year)'];
+  const lanes = new Map(laneLabels.map((label) => [label, []]));
   const now = new Date();
 
   groups.forEach(([groupName, items]) => {
-    const latestCapture = items.reduce((latest, scan) => {
-      const at = new Date(scan.capturedAt);
-      return at > latest ? at : latest;
+    const mostRecent = items.reduce((latest, scan) => {
+      const when = new Date(scan.capturedAt);
+      return when > latest ? when : latest;
     }, new Date(0));
 
-    const elapsedMs = now - latestCapture;
-    const daysAgo = Math.floor(elapsedMs / (1000 * 60 * 60 * 24));
-    const lane = assignmentBucket(daysAgo);
-    lanes.get(lane).push({ groupName, items, daysAgo });
+    const daysAgo = Math.floor((now - mostRecent) / (1000 * 60 * 60 * 24));
+    lanes.get(assignmentBucket(daysAgo)).push({ groupName, items, daysAgo });
   });
 
-  timelineOrder.forEach((lane) => {
-    const laneSection = document.createElement('section');
-    laneSection.className = 'timeline-lane';
+  laneLabels.forEach((label) => {
+    const lane = document.createElement('section');
+    lane.className = 'timeline-lane';
+    const title = document.createElement('h3');
+    title.textContent = label;
+    const track = document.createElement('div');
+    track.className = 'timeline-track';
 
-    const laneTitle = document.createElement('h3');
-    laneTitle.textContent = lane;
-
-    const laneTrack = document.createElement('div');
-    laneTrack.className = 'timeline-track';
-
-    lanes.get(lane).forEach(({ groupName, items, daysAgo }) => {
+    lanes.get(label).forEach(({ groupName, items, daysAgo }) => {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'timeline-chip';
-
-      const title = document.createElement('h4');
-      title.textContent = groupName;
-      const details = document.createElement('p');
-      details.textContent = `${items.length} samples · ${Math.max(daysAgo, 0)}d ago`;
-
-      chip.append(title, details);
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
+      chip.innerHTML = `<h4>${groupName}</h4><p>${items.length} samples · ${Math.max(daysAgo, 0)}d ago</p>`;
       chip.addEventListener('click', () => openGroupModal(groupName));
-=======
-      chip.addEventListener('click', () => {
-        state.viewMode = 'rows';
-        state.activeCluster = groupName;
-        render();
-      });
-
->>>>>>> main
-      laneTrack.appendChild(chip);
+      track.appendChild(chip);
     });
 
-    laneSection.append(laneTitle, laneTrack);
-    clusterPlane.appendChild(laneSection);
+    lane.append(title, track);
+    clusterPlane.appendChild(lane);
   });
 }
 
@@ -344,25 +316,8 @@ function renderConceptClusters(groups) {
     centroid.className = 'cluster-centroid';
     centroid.style.left = `${centerX}%`;
     centroid.style.top = `${centerY}%`;
-    centroid.setAttribute('aria-label', `Open ${groupName}`);
-
-    const title = document.createElement('h3');
-    title.textContent = groupName;
-    const meta = document.createElement('p');
-    meta.textContent = `${items.length} samples`;
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-
-    centroid.append(title, meta);
+    centroid.innerHTML = `<h3>${groupName}</h3><p>${items.length} samples</p>`;
     centroid.addEventListener('click', () => openGroupModal(groupName));
-=======
-    centroid.append(title, meta);
-
-    centroid.addEventListener('click', () => {
-      state.viewMode = 'rows';
-      state.activeCluster = groupName;
-      render();
-    });
->>>>>>> main
 
     clusterPlane.append(blob, centroid);
   });
@@ -376,43 +331,21 @@ function renderOverview(groups) {
     renderStudentGrid(groups);
     return;
   }
-
   if (state.sortKey === 'assignment') {
     renderAssignmentTimeline(groups);
     return;
   }
-
   renderConceptClusters(groups);
 }
 
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
 function renderGroupModal() {
-  const groups = groupScans();
-  const activeGroup = groups.find(([groupName]) => groupName === state.activeCluster);
+  const activeGroup = groupScans().find(([groupName]) => groupName === state.activeCluster);
   if (!activeGroup) return;
 
   const [groupName, items] = activeGroup;
   groupModalTitle.textContent = `${labels[state.sortKey]}: ${groupName}`;
   groupModalMeta.textContent = `${items.length} work samples`;
   groupGallery.textContent = '';
-=======
-function renderRows(groups) {
-  gallery.textContent = '';
-  const activeGroup = groups.find(([groupName]) => groupName === state.activeCluster) || groups[0];
-  if (!activeGroup) return;
-
-  const [groupName, items] = activeGroup;
-  state.activeCluster = groupName;
-
-  const section = document.createElement('section');
-  section.className = 'group';
-
-  const title = document.createElement('h3');
-  title.textContent = `${labels[state.sortKey]}: ${groupName}`;
-
-  const grid = document.createElement('div');
-  grid.className = 'group-grid';
->>>>>>> main
 
   orderedItems(items).forEach((scan) => {
     const card = template.content.firstElementChild.cloneNode(true);
@@ -420,87 +353,24 @@ function renderRows(groups) {
     setImageSource(card.querySelector('img'), scan);
     card.querySelector('.student').textContent = scan.student;
     card.querySelector('.assignment').textContent = scan.assignment;
-    card.querySelector('.topic').textContent = scan.topic;
+    card.querySelector('.objective').textContent = scan.lessonObjective;
     card.querySelector('.standard').textContent = scan.standard;
     card.querySelector('.date').textContent = new Date(scan.capturedAt).toLocaleString();
 
     button.addEventListener('click', () => openFocus(scan.id));
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
     groupGallery.appendChild(card);
   });
-=======
-    grid.appendChild(card);
-  });
-
-  section.append(title, grid);
-  gallery.appendChild(section);
->>>>>>> main
-}
-
-function render() {
-  const groups = groupScans();
-  updateSummary(groups);
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-  updateViewControls();
-
-  if (!groups.length) {
-    clusterPlane.textContent = 'No captures available.';
-    return;
-  }
-
-  renderOverview(groups);
-
-  if (groupModal.open) {
-    if (groups.some(([groupName]) => groupName === state.activeCluster)) {
-      renderGroupModal();
-    } else {
-      groupModal.close();
-    }
-  }
-=======
-
-  if (!groups.length) {
-    clusterPlane.textContent = 'No captures available.';
-    gallery.textContent = '';
-    return;
-  }
-
-  if (state.viewMode === 'rows' && !groups.some(([groupName]) => groupName === state.activeCluster)) {
-    state.activeCluster = groups[0][0];
-  }
-
-  renderOverview(groups);
-  renderRows(groups);
-  updateViewControls();
->>>>>>> main
-}
-
-function setActiveTool(toolName) {
-  state.tool = toolName;
-  [highlightTool, stickerGood, stickerMisconception].forEach((btn) => btn.classList.remove('active'));
-  if (toolName === 'highlight') highlightTool.classList.add('active');
-  if (toolName === 'good') stickerGood.classList.add('active');
-  if (toolName === 'misconception') stickerMisconception.classList.add('active');
-}
-
-function selectedScan() {
-  return scans.find((scan) => scan.id === state.selectedId);
 }
 
 function drawAnnotation(annotation) {
   const element = document.createElement('div');
   element.className = annotation.type;
 
-  if (annotation.type === 'highlight') {
-    element.style.left = `${annotation.x}%`;
-    element.style.top = `${annotation.y}%`;
-    element.style.width = `${annotation.width}%`;
-    element.style.height = `${annotation.height}%`;
-  } else {
+  if (annotation.type === 'tag') {
     element.classList.add('sticker');
     element.style.left = `${annotation.x}%`;
     element.style.top = `${annotation.y}%`;
-    element.textContent = annotation.text;
+    element.textContent = annotation.category;
   }
 
   annotationLayer.appendChild(element);
@@ -510,7 +380,7 @@ function renderAnnotations() {
   annotationLayer.textContent = '';
   const scan = selectedScan();
   if (!scan) return;
-  scan.annotations.forEach(drawAnnotation);
+  (scan.annotations || []).forEach(drawAnnotation);
 }
 
 function openFocus(scanId) {
@@ -521,57 +391,154 @@ function openFocus(scanId) {
   setImageSource(focusImage, scan);
   metaForm.student.value = scan.student;
   metaForm.assignment.value = scan.assignment;
-  metaForm.topic.value = scan.topic;
+  metaForm.lessonObjective.value = scan.lessonObjective;
   metaForm.standard.value = scan.standard;
   metaForm.capturedAt.value = scan.capturedAt;
-  setActiveTool(null);
   renderAnnotations();
   focusModal.showModal();
 }
 
-sortButtons.addEventListener('click', (event) => {
-  const button = event.target.closest('button[data-sort]');
-  if (!button) return;
-  state.sortKey = button.dataset.sort;
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
+function updateInsights() {
+  const set = currentSetForInsights();
+  const tags = set.flatMap((scan) => (scan.annotations || []).filter((item) => item.type === 'tag').map((item) => ({ ...item, student: scan.student })));
+  const misconceptionTags = tags.filter((tag) => tag.category !== 'Great strategy');
+
+  if (!misconceptionTags.length) {
+    insightTop.textContent = 'Top misconception this set: —';
+    insightMove.textContent = 'Suggested next move: Tag 3+ samples to generate a move.';
+    insightStudents.textContent = '';
+    insightGroup.textContent = 'Suggested grouping: —';
+    reteachNote.value = '';
+    exportGroupCsv.href = '#';
+    updateTourFromState();
+    return;
+  }
+
+  const counts = misconceptionTags.reduce((acc, tag) => {
+    acc[tag.category] = (acc[tag.category] || 0) + 1;
+    return acc;
+  }, {});
+
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+  const studentList = [...new Set(misconceptionTags.filter((tag) => tag.category === top).map((tag) => tag.student))];
+
+  insightTop.textContent = `Top misconception this set: ${top}`;
+  insightMove.textContent = `Suggested next move: ${misconceptionTemplates[top]}`;
+  insightStudents.textContent = '';
+  studentList.forEach((name) => {
+    const li = document.createElement('li');
+    li.textContent = name;
+    insightStudents.appendChild(li);
+  });
+
+  insightGroup.textContent = `Suggested grouping: Small group (${studentList.length} students)`;
+  reteachNote.value = `Tomorrow: reteach ${top.toLowerCase()} with a worked example, think-aloud, and quick check for ${studentList.length} students.`;
+
+  const csv = `student\n${studentList.join('\n')}`;
+  exportGroupCsv.href = `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;
+  updateTourFromState();
+}
+
+function renderStickerButtons() {
+  if (!stickerButtons) return;
+  stickerButtons.textContent = '';
+  Object.keys(misconceptionTemplates).forEach((name) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = name;
+    btn.className = state.activeSticker === name ? 'active' : '';
+    btn.addEventListener('click', () => {
+      state.activeSticker = name;
+      renderStickerButtons();
+    });
+    stickerButtons.appendChild(btn);
+  });
+}
+
+function render() {
+  const requiredNodes = [summary, emptyState, viewControls, sidePanels, clusterPlane, groupBySelect];
+  if (requiredNodes.some((node) => !node)) {
+    console.error('WorkSaver UI failed to initialize: expected DOM nodes are missing. Ensure GitHub Pages is serving latest index.html.');
+    return;
+  }
+
+  const groups = groupScans();
+  updateHeaderAndEmptyState(groups);
+  updateViewHint();
+  renderTour();
+  renderStickerButtons();
+  updateInsights();
+
+  if (!state.scans.length) {
+    clusterPlane.textContent = '';
+    return;
+  }
+
+  renderOverview(groups);
+
+  if (groupModal.open) {
+    if (groups.some(([groupName]) => groupName === state.activeCluster)) renderGroupModal();
+    else groupModal.close();
+  }
+}
+
+function loadDemoData() {
+  const { scans } = window.WorkSaverDemoData.createDemoClassSet(200);
+  state.scans = scans;
+  state.demoLoaded = true;
+  state.sortKey = 'lessonObjective';
+  groupBySelect.value = state.sortKey;
+  state.smallGroupCreated = false;
+  state.tourActiveIndex = 1;
+  showToast('Demo class loaded.');
+  updateTourFromState();
+  render();
+}
+
+function resetAll() {
+  state.scans = [];
+  state.sortKey = 'misconception';
+  groupBySelect.value = state.sortKey;
   state.activeCluster = null;
+  state.selectedId = null;
+  state.activeSticker = null;
+  state.tagHistory = [];
+  state.demoLoaded = false;
+  state.smallGroupCreated = false;
+  state.tourCompleted = [false, false, false, false, false];
+  state.tourActiveIndex = 0;
   if (groupModal.open) groupModal.close();
-=======
-  state.viewMode = 'plane';
+  if (focusModal.open) focusModal.close();
+  showToast('Reset complete.');
+  render();
+}
+
+on(loadDemoBtn, 'click', loadDemoData);
+on(tryDemoBtn, 'click', loadDemoData);
+on(resetBtn, 'click', resetAll);
+
+on(groupBySelect, 'change', () => {
+  state.sortKey = groupBySelect.value;
   state.activeCluster = null;
->>>>>>> main
-  [...sortButtons.querySelectorAll('button')].forEach((btn) => btn.classList.toggle('active', btn === button));
+  if (groupModal?.open) groupModal.close();
   render();
 });
 
-shuffleToggle.addEventListener('change', () => {
+on(shuffleToggle, 'change', () => {
   state.shuffle = shuffleToggle.checked;
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-  if (groupModal.open) renderGroupModal();
+  if (groupModal?.open) renderGroupModal();
   render();
 });
 
-closeGroupModal.addEventListener('click', () => groupModal.close());
-closeModal.addEventListener('click', () => focusModal.close());
+on(closeGroupModal, 'click', () => groupModal?.close());
+on(closeModal, 'click', () => focusModal?.close());
 
-groupModal.addEventListener('close', () => {
-  state.activeCluster = null;
-});
-
-=======
-  render();
-});
-
-zoomOutButton.addEventListener('click', () => {
-  state.viewMode = 'plane';
+on(groupModal, 'close', () => {
   state.activeCluster = null;
   render();
 });
 
-closeModal.addEventListener('click', () => focusModal.close());
-
->>>>>>> main
-metaForm.addEventListener('submit', (event) => {
+on(metaForm, 'submit', (event) => {
   event.preventDefault();
   const scan = selectedScan();
   if (!scan) return;
@@ -579,66 +546,74 @@ metaForm.addEventListener('submit', (event) => {
   const formData = new FormData(metaForm);
   scan.student = formData.get('student');
   scan.assignment = formData.get('assignment');
-  scan.topic = formData.get('topic');
+  scan.lessonObjective = formData.get('lessonObjective');
   scan.standard = formData.get('standard');
   scan.capturedAt = formData.get('capturedAt');
 
   render();
+  showToast('Metadata saved.');
 });
 
-highlightTool.addEventListener('click', () => setActiveTool('highlight'));
-stickerGood.addEventListener('click', () => setActiveTool('good'));
-stickerMisconception.addEventListener('click', () => setActiveTool('misconception'));
-
-clearAnnotations.addEventListener('click', () => {
+on(imageCanvas, 'pointerdown', (event) => {
   const scan = selectedScan();
-  if (!scan) return;
-  scan.annotations = [];
+  if (!scan || !state.activeSticker) return;
+
+  const rect = annotationLayer.getBoundingClientRect();
+  const x = ((event.clientX - rect.left) / rect.width) * 100;
+  const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+  const tag = {
+    id: crypto.randomUUID(),
+    type: 'tag',
+    category: state.activeSticker,
+    x,
+    y
+  };
+
+  scan.annotations.push(tag);
+  state.tagHistory.push({ scanId: scan.id, tagId: tag.id, category: tag.category });
   renderAnnotations();
+  render();
+  showToast(`Tagged: ${tag.category}`);
 });
 
-imageCanvas.addEventListener('pointerdown', (event) => {
-  const scan = selectedScan();
+on(undoTag, 'click', () => {
+  const latest = state.tagHistory.pop();
+  if (!latest) return;
+
+  const scan = state.scans.find((item) => item.id === latest.scanId);
   if (!scan) return;
-  const rect = annotationLayer.getBoundingClientRect();
-  const xPercent = ((event.clientX - rect.left) / rect.width) * 100;
-  const yPercent = ((event.clientY - rect.top) / rect.height) * 100;
 
-  if (state.tool === 'good' || state.tool === 'misconception') {
-    scan.annotations.push({
-      type: 'sticker',
-      x: xPercent,
-      y: yPercent,
-      text: state.tool === 'good' ? 'Good Work Example' : 'Misconception to Watch'
-    });
-    renderAnnotations();
-    return;
-  }
+  scan.annotations = (scan.annotations || []).filter((tag) => tag.id !== latest.tagId);
+  renderAnnotations();
+  render();
+  showToast(`Undo tag: ${latest.category}`);
+});
 
-  if (state.tool === 'highlight') {
-    state.drawing = { startX: xPercent, startY: yPercent };
+document.addEventListener('keydown', (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
+    event.preventDefault();
+    undoTag.click();
   }
 });
 
-imageCanvas.addEventListener('pointerup', (event) => {
-  const scan = selectedScan();
-  if (!scan || !state.drawing || state.tool !== 'highlight') return;
+on(tourNext, 'click', () => {
+  state.tourCompleted[state.tourActiveIndex] = true;
+  const next = state.tourCompleted.findIndex((done) => !done);
+  if (next >= 0) state.tourActiveIndex = next;
+  renderTour();
+});
 
-  const rect = annotationLayer.getBoundingClientRect();
-  const endX = ((event.clientX - rect.left) / rect.width) * 100;
-  const endY = ((event.clientY - rect.top) / rect.height) * 100;
+on(tourSkip, 'click', () => {
+  const panel = document.querySelector('.tour-panel');
+  if (panel) panel.hidden = true;
+});
 
-  const x = Math.min(state.drawing.startX, endX);
-  const y = Math.min(state.drawing.startY, endY);
-  const width = Math.abs(state.drawing.startX - endX);
-  const height = Math.abs(state.drawing.startY - endY);
-
-  if (width > 1 && height > 1) {
-    scan.annotations.push({ type: 'highlight', x, y, width, height });
-    renderAnnotations();
-  }
-
-  state.drawing = null;
+on(createSmallGroupBtn, 'click', () => {
+  state.smallGroupCreated = true;
+  showToast('Small group created from current insight set.');
+  updateTourFromState();
+  renderTour();
 });
 
 render();

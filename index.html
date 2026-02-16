@@ -3,39 +3,84 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WorkSaver Teacher Studio</title>
+    <title>WorkSaver (Prototype)</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="topbar">
       <div>
-        <h1>WorkSaver Teacher Studio</h1>
-        <p>Review, organize, and annotate scanned student work.</p>
+        <h1>WorkSaver (Prototype)</h1>
+        <p class="value-prop">Explore how teachers can surface misconceptions in student work and turn them into next instructional moves.</p>
+        <p class="note">Prototype: interaction + workflow exploration (not production-ready)</p>
       </div>
-      <div class="summary" id="summary"></div>
+      <div class="top-actions">
+        <button id="loadDemoBtn" class="primary">Load Demo Class (200 samples)</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+      </div>
     </header>
 
-    <main>
-      <section class="controls">
-        <h2>Organize gallery</h2>
-        <div class="button-row" id="sortButtons">
-          <button data-sort="student" class="active">By Student</button>
-          <button data-sort="assignment">By Assignment</button>
-          <button data-sort="topic">By Math Topic</button>
-          <button data-sort="standard">By Common Core Standard</button>
-        </div>
-        <label class="shuffle-toggle">
-          <input type="checkbox" id="shuffleToggle" />
-          Shuffle order inside each group
-        </label>
+    <main class="layout">
+      <section class="workspace">
+        <section class="controls">
+          <h2>Teacher decision filters</h2>
+          <label>
+            Group by
+            <select id="groupBySelect">
+              <option value="misconception">Misconception</option>
+              <option value="lessonObjective">Lesson / Objective</option>
+              <option value="standard">Standard</option>
+              <option value="assignment">Assignment</option>
+              <option value="student">Student</option>
+            </select>
+          </label>
+          <label class="shuffle-toggle">
+            <input type="checkbox" id="shuffleToggle" />
+            Shuffle order inside each group
+          </label>
+          <p class="summary" id="summary"></p>
+        </section>
+
+        <section class="empty-state" id="emptyState">
+          <div class="empty-art">📚✏️🧮</div>
+          <h3>Start with a demo class set</h3>
+          <p>Load realistic student work to explore clusters, tag misconceptions, and generate next-step instructional insights.</p>
+          <button id="tryDemoBtn" class="primary">Try demo</button>
+        </section>
+
+        <section class="view-controls" id="viewControls" hidden>
+          <p id="viewHint"></p>
+        </section>
+
+        <section id="clusterPlane" class="cluster-plane" hidden></section>
       </section>
 
-      <section class="view-controls">
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-        <p id="viewHint">Click a student, assignment, topic, or standard to open work samples in a modal.</p>
-      </section>
+      <aside class="side-panels" id="sidePanels" hidden>
+        <section class="panel tour-panel">
+          <h2>60-second tour</h2>
+          <ol id="tourChecklist"></ol>
+          <div class="tour-actions">
+            <button id="tourNext">Next</button>
+            <button id="tourSkip" class="secondary">Skip</button>
+          </div>
+        </section>
 
-      <section id="clusterPlane" class="cluster-plane"></section>
+        <section class="panel insights-panel">
+          <h2>Instructional insights</h2>
+          <p id="insightTop">Top misconception this set: —</p>
+          <p id="insightMove">Suggested next move: —</p>
+          <div>
+            <h3>Students to pull</h3>
+            <ul id="insightStudents"></ul>
+          </div>
+          <p id="insightGroup">Suggested grouping: —</p>
+          <button id="createSmallGroupBtn">Create small group</button>
+          <a id="exportGroupCsv" href="#" download="small-group.csv">Export small group CSV</a>
+          <label class="reteach-note">
+            Tomorrow's re-teach note
+            <textarea id="reteachNote" rows="4"></textarea>
+          </label>
+        </section>
+      </aside>
     </main>
 
     <dialog id="groupModal" class="group-modal">
@@ -49,16 +94,6 @@
       </article>
     </dialog>
 
-=======
-        <p id="viewHint">Cluster map view: click a cluster to zoom into row view.</p>
-        <button id="zoomOutButton" type="button" class="secondary" hidden>← Zoom out to all clusters</button>
-      </section>
-
-      <section id="clusterPlane" class="cluster-plane"></section>
-      <section id="gallery" class="gallery" hidden></section>
-    </main>
-
->>>>>>> main
     <dialog id="focusModal" class="focus-modal">
       <article>
         <button id="closeModal" class="close">✕</button>
@@ -81,11 +116,11 @@
                 <input name="assignment" required />
               </label>
               <label>
-                Math topic
-                <input name="topic" required />
+                Lesson / Objective
+                <input name="lessonObjective" required />
               </label>
               <label>
-                Common Core
+                Standard
                 <input name="standard" required />
               </label>
               <label>
@@ -95,16 +130,9 @@
               <button type="submit">Save metadata</button>
             </form>
 
-            <h3>Annotation tools</h3>
-            <div class="tool-buttons">
-              <button id="highlightTool" type="button">Highlighter</button>
-              <button id="stickerGood" type="button">Sticker: Good Work</button>
-              <button id="stickerMisconception" type="button">Sticker: Misconception</button>
-              <button id="clearAnnotations" type="button" class="secondary">Clear Annotations</button>
-            </div>
-            <p class="hint">
-              Use the highlighter by clicking and dragging on the image. For stickers, choose a sticker then click where you want to place it.
-            </p>
+            <h3>Misconception stickers</h3>
+            <div class="tool-buttons" id="stickerButtons"></div>
+            <button id="undoTag" type="button" class="secondary">Undo last tag</button>
           </div>
         </div>
       </article>
@@ -117,7 +145,7 @@
           <div class="card-details">
             <h4 class="student"></h4>
             <p class="assignment"></p>
-            <p class="topic"></p>
+            <p class="objective"></p>
             <p class="standard"></p>
             <p class="date"></p>
           </div>
@@ -125,6 +153,9 @@
       </article>
     </template>
 
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="demoData.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

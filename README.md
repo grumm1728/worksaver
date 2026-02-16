@@ -1,25 +1,26 @@
 # WorkSaver
 
-A prototype teacher web interface for reviewing and organizing photos/videos of student work.
+A prototype teacher web interface for reviewing student work and making instructional decisions quickly.
 
 ## Features
 
-- Context-aware zoomed-out views by active filter:
-  - **Student**: alphabetized bulletin-board grid with per-student sample volume indicator.
-  - **Assignment**: desk-themed timeline lanes (`Today`, `1-7 days ago`, `8-30 days ago`, `31+ days ago (school year)`).
-  - **Math Topic / Common Core**: chalkboard-themed k-means style concept clusters.
-- Seeded with a larger dataset: provided local `photo *.JPG` samples plus 20 additional dummy captures for testing scale.
-<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
-- Click-to-open workflow: selecting a student/assignment/topic/standard opens that group's work in a dedicated modal gallery.
-=======
-- Click-to-zoom workflow: open a group from zoomed-out view and inspect that group's thumbnails in organized rows.
->>>>>>> main
-- Grouping controls: student, assignment, math topic, and Common Core standard.
-- Optional shuffle inside each group.
-- Focus mode for a single capture with editable metadata.
-- Annotation tools in focus mode:
-  - Highlighter rectangles
-  - Sticker tags for "Good Work Example" and "Misconception to Watch"
+- Value-first onboarding with a clear teacher-decision framing and one-click **Load Demo Class (200 samples)**.
+- Empty-state landing with **Try demo** CTA and a full client-side demo dataset.
+- Filtered overview modes for teacher workflows:
+  - Student (bulletin-board style grid)
+  - Assignment (timeline lanes)
+  - Lesson / Objective, Standard, and Misconception (cluster map)
+- Click any group to open a **modal gallery** of work samples.
+- Focus mode for a single sample with metadata editing, including **Lesson / Objective**.
+- 5 misconception/strength stickers:
+  - Place value confusion
+  - Regrouping error
+  - Didn't show work
+  - Great strategy
+  - Answer-only
+- Real-time **Instructional insights** panel (rule-based): top misconception, suggested next move, student list, grouping suggestion, export CSV, and re-teach note.
+- Guided **60-second tour** checklist that walks reviewers through the decision loop.
+- Tagging polish with toast feedback and undo support (button + Ctrl/Cmd+Z).
 
 ## Run locally
 
