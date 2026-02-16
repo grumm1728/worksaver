@@ -9,7 +9,11 @@ A prototype teacher web interface for reviewing and organizing photos/videos of 
   - **Assignment**: desk-themed timeline lanes (`Today`, `1-7 days ago`, `8-30 days ago`, `31+ days ago (school year)`).
   - **Math Topic / Common Core**: chalkboard-themed k-means style concept clusters.
 - Seeded with a larger dataset: provided local `photo *.JPG` samples plus 20 additional dummy captures for testing scale.
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
 - Click-to-open workflow: selecting a student/assignment/topic/standard opens that group's work in a dedicated modal gallery.
+=======
+- Click-to-zoom workflow: open a group from zoomed-out view and inspect that group's thumbnails in organized rows.
+>>>>>>> main
 - Grouping controls: student, assignment, math topic, and Common Core standard.
 - Optional shuffle inside each group.
 - Focus mode for a single capture with editable metadata.

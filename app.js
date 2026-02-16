@@ -16,7 +16,20 @@ const providedWorkSampleFiles = [
 
 const dummyWorkSamples = Array.from({ length: 20 }, (_, index) => `https://picsum.photos/seed/worksaver-dummy-${index + 1}/1400/980`);
 
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
 const roster = ['Ava Thompson', 'Liam Chen', 'Noah Rivera', 'Mia Patel', 'Sophia Martinez', 'Ethan Brooks', 'Olivia Green', 'Lucas Adams'];
+=======
+const roster = [
+  'Ava Thompson',
+  'Liam Chen',
+  'Noah Rivera',
+  'Mia Patel',
+  'Sophia Martinez',
+  'Ethan Brooks',
+  'Olivia Green',
+  'Lucas Adams'
+];
+>>>>>>> main
 
 const assignments = [
   'Skyline Express Poster',
@@ -64,10 +77,15 @@ const state = {
   selectedId: null,
   tool: null,
   drawing: null,
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
+=======
+  viewMode: 'plane',
+>>>>>>> main
   activeCluster: null
 };
 
 const sortButtons = document.getElementById('sortButtons');
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
 const clusterPlane = document.getElementById('clusterPlane');
 const summary = document.getElementById('summary');
 const viewHint = document.getElementById('viewHint');
@@ -80,6 +98,15 @@ const groupModalTitle = document.getElementById('groupModalTitle');
 const groupModalMeta = document.getElementById('groupModalMeta');
 const groupGallery = document.getElementById('groupGallery');
 
+=======
+const gallery = document.getElementById('gallery');
+const clusterPlane = document.getElementById('clusterPlane');
+const summary = document.getElementById('summary');
+const viewHint = document.getElementById('viewHint');
+const zoomOutButton = document.getElementById('zoomOutButton');
+const shuffleToggle = document.getElementById('shuffleToggle');
+const template = document.getElementById('cardTemplate');
+>>>>>>> main
 const focusModal = document.getElementById('focusModal');
 const closeModal = document.getElementById('closeModal');
 const focusImage = document.getElementById('focusImage');
@@ -129,17 +156,40 @@ function updateSummary(groups) {
 }
 
 function updateViewControls() {
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
   if (state.sortKey === 'student') {
     viewHint.textContent = 'Student board view: alphabetic grid with workload indicators. Click any tile to open its work in a modal.';
+=======
+  const isRows = state.viewMode === 'rows';
+  zoomOutButton.hidden = !isRows;
+  clusterPlane.hidden = isRows;
+  gallery.hidden = !isRows;
+
+  if (isRows) {
+    viewHint.textContent = `Zoomed into ${labels[state.sortKey].toLowerCase()} group: ${state.activeCluster}`;
+    return;
+  }
+
+  if (state.sortKey === 'student') {
+    viewHint.textContent = 'Student board view: alphabetic grid with workload indicators.';
+>>>>>>> main
     return;
   }
 
   if (state.sortKey === 'assignment') {
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
     viewHint.textContent = 'Assignment timeline view: today, 1-7 days, 8-30 days, and school-year archive. Click any assignment to open its work in a modal.';
     return;
   }
 
   viewHint.textContent = 'Concept map view: k-means style clusters by topic/standard. Click any concept to open its work in a modal.';
+=======
+    viewHint.textContent = 'Assignment timeline view: today, 1-7 days, 8-30 days, and school-year archive.';
+    return;
+  }
+
+  viewHint.textContent = 'Concept map view: k-means style clusters by topic/standard.';
+>>>>>>> main
 }
 
 function applyBackdropTheme() {
@@ -153,12 +203,15 @@ function applyBackdropTheme() {
   }
 }
 
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
 function openGroupModal(groupName) {
   state.activeCluster = groupName;
   renderGroupModal();
   groupModal.showModal();
 }
 
+=======
+>>>>>>> main
 function renderStudentGrid(groups) {
   clusterPlane.innerHTML = '';
   clusterPlane.classList.add('student-grid-view');
@@ -179,7 +232,10 @@ function renderStudentGrid(groups) {
     meter.className = 'sample-meter';
     const maxBars = Math.min(10, Math.max(...groups.map(([, groupItems]) => groupItems.length)));
     const activeBars = Math.max(1, Math.round((items.length / maxBars) * 10));
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
 
+=======
+>>>>>>> main
     for (let i = 0; i < 10; i += 1) {
       const dot = document.createElement('span');
       dot.className = i < activeBars ? 'on' : '';
@@ -187,7 +243,16 @@ function renderStudentGrid(groups) {
     }
 
     card.append(name, count, meter);
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
     card.addEventListener('click', () => openGroupModal(groupName));
+=======
+    card.addEventListener('click', () => {
+      state.viewMode = 'rows';
+      state.activeCluster = groupName;
+      render();
+    });
+
+>>>>>>> main
     clusterPlane.appendChild(card);
   });
 }
@@ -240,7 +305,16 @@ function renderAssignmentTimeline(groups) {
       details.textContent = `${items.length} samples · ${Math.max(daysAgo, 0)}d ago`;
 
       chip.append(title, details);
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
       chip.addEventListener('click', () => openGroupModal(groupName));
+=======
+      chip.addEventListener('click', () => {
+        state.viewMode = 'rows';
+        state.activeCluster = groupName;
+        render();
+      });
+
+>>>>>>> main
       laneTrack.appendChild(chip);
     });
 
@@ -276,9 +350,19 @@ function renderConceptClusters(groups) {
     title.textContent = groupName;
     const meta = document.createElement('p');
     meta.textContent = `${items.length} samples`;
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
 
     centroid.append(title, meta);
     centroid.addEventListener('click', () => openGroupModal(groupName));
+=======
+    centroid.append(title, meta);
+
+    centroid.addEventListener('click', () => {
+      state.viewMode = 'rows';
+      state.activeCluster = groupName;
+      render();
+    });
+>>>>>>> main
 
     clusterPlane.append(blob, centroid);
   });
@@ -301,6 +385,7 @@ function renderOverview(groups) {
   renderConceptClusters(groups);
 }
 
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
 function renderGroupModal() {
   const groups = groupScans();
   const activeGroup = groups.find(([groupName]) => groupName === state.activeCluster);
@@ -310,6 +395,24 @@ function renderGroupModal() {
   groupModalTitle.textContent = `${labels[state.sortKey]}: ${groupName}`;
   groupModalMeta.textContent = `${items.length} work samples`;
   groupGallery.textContent = '';
+=======
+function renderRows(groups) {
+  gallery.textContent = '';
+  const activeGroup = groups.find(([groupName]) => groupName === state.activeCluster) || groups[0];
+  if (!activeGroup) return;
+
+  const [groupName, items] = activeGroup;
+  state.activeCluster = groupName;
+
+  const section = document.createElement('section');
+  section.className = 'group';
+
+  const title = document.createElement('h3');
+  title.textContent = `${labels[state.sortKey]}: ${groupName}`;
+
+  const grid = document.createElement('div');
+  grid.className = 'group-grid';
+>>>>>>> main
 
   orderedItems(items).forEach((scan) => {
     const card = template.content.firstElementChild.cloneNode(true);
@@ -322,13 +425,22 @@ function renderGroupModal() {
     card.querySelector('.date').textContent = new Date(scan.capturedAt).toLocaleString();
 
     button.addEventListener('click', () => openFocus(scan.id));
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
     groupGallery.appendChild(card);
   });
+=======
+    grid.appendChild(card);
+  });
+
+  section.append(title, grid);
+  gallery.appendChild(section);
+>>>>>>> main
 }
 
 function render() {
   const groups = groupScans();
   updateSummary(groups);
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
   updateViewControls();
 
   if (!groups.length) {
@@ -345,6 +457,22 @@ function render() {
       groupModal.close();
     }
   }
+=======
+
+  if (!groups.length) {
+    clusterPlane.textContent = 'No captures available.';
+    gallery.textContent = '';
+    return;
+  }
+
+  if (state.viewMode === 'rows' && !groups.some(([groupName]) => groupName === state.activeCluster)) {
+    state.activeCluster = groups[0][0];
+  }
+
+  renderOverview(groups);
+  renderRows(groups);
+  updateViewControls();
+>>>>>>> main
 }
 
 function setActiveTool(toolName) {
@@ -405,14 +533,20 @@ sortButtons.addEventListener('click', (event) => {
   const button = event.target.closest('button[data-sort]');
   if (!button) return;
   state.sortKey = button.dataset.sort;
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
   state.activeCluster = null;
   if (groupModal.open) groupModal.close();
+=======
+  state.viewMode = 'plane';
+  state.activeCluster = null;
+>>>>>>> main
   [...sortButtons.querySelectorAll('button')].forEach((btn) => btn.classList.toggle('active', btn === button));
   render();
 });
 
 shuffleToggle.addEventListener('change', () => {
   state.shuffle = shuffleToggle.checked;
+<<<<<<< codex/build-teacher-interface-for-photo-management-agohzs
   if (groupModal.open) renderGroupModal();
   render();
 });
@@ -424,6 +558,19 @@ groupModal.addEventListener('close', () => {
   state.activeCluster = null;
 });
 
+=======
+  render();
+});
+
+zoomOutButton.addEventListener('click', () => {
+  state.viewMode = 'plane';
+  state.activeCluster = null;
+  render();
+});
+
+closeModal.addEventListener('click', () => focusModal.close());
+
+>>>>>>> main
 metaForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const scan = selectedScan();
