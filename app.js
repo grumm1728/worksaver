@@ -40,8 +40,8 @@ const topics = ['Patterns', 'Combinatorics', 'Expressions', 'Reasoning & Proof']
 const standards = ['CCSS.MATH.CONTENT.5.OA.B.3', 'CCSS.MATH.CONTENT.6.EE.A.2', 'CCSS.MATH.PRACTICE.MP3'];
 
 function buildScan(imageUrl, index, sourceLabel) {
-  const baseDate = new Date('2026-02-01T08:00:00');
-  baseDate.setHours(baseDate.getHours() + index * 3);
+  const baseDate = new Date();
+  baseDate.setHours(baseDate.getHours() - index * 36);
 
   return {
     id: crypto.randomUUID(),
@@ -58,7 +58,6 @@ function buildScan(imageUrl, index, sourceLabel) {
 
 const providedScans = providedWorkSampleFiles.map((fileName, index) => buildScan(fileName, index, 'provided sample'));
 const dummyScans = dummyWorkSamples.map((imageUrl, index) => buildScan(imageUrl, index + providedScans.length, 'dummy sample'));
-
 const scans = [...providedScans, ...dummyScans];
 
 const labels = {
@@ -131,7 +130,7 @@ function orderedItems(items) {
 }
 
 function updateSummary(groups) {
-  summary.textContent = `${scans.length} captures · ${groups.length} ${labels[state.sortKey].toLowerCase()} clusters`;
+  summary.textContent = `${scans.length} captures · ${groups.length} ${labels[state.sortKey].toLowerCase()} groups`;
 }
 
 function updateViewControls() {
@@ -139,52 +138,189 @@ function updateViewControls() {
   zoomOutButton.hidden = !isRows;
   clusterPlane.hidden = isRows;
   gallery.hidden = !isRows;
-  viewHint.textContent = isRows
-    ? `Zoomed into ${labels[state.sortKey].toLowerCase()} cluster: ${state.activeCluster}`
-    : 'Cluster map view: click a cluster to zoom into row view.';
+
+  if (isRows) {
+    viewHint.textContent = `Zoomed into ${labels[state.sortKey].toLowerCase()} group: ${state.activeCluster}`;
+    return;
+  }
+
+  if (state.sortKey === 'student') {
+    viewHint.textContent = 'Student board view: alphabetic grid with workload indicators.';
+    return;
+  }
+
+  if (state.sortKey === 'assignment') {
+    viewHint.textContent = 'Assignment timeline view: today, 1-7 days, 8-30 days, and school-year archive.';
+    return;
+  }
+
+  viewHint.textContent = 'Concept map view: k-means style clusters by topic/standard.';
 }
 
-function renderClusterPlane(groups) {
-  clusterPlane.textContent = '';
-  const count = groups.length;
+function applyBackdropTheme() {
+  clusterPlane.classList.remove('theme-bulletin', 'theme-desk', 'theme-chalkboard');
+  if (state.sortKey === 'student') {
+    clusterPlane.classList.add('theme-bulletin');
+  } else if (state.sortKey === 'assignment') {
+    clusterPlane.classList.add('theme-desk');
+  } else {
+    clusterPlane.classList.add('theme-chalkboard');
+  }
+}
 
-  groups.forEach(([groupName, items], index) => {
-    const angle = (index / Math.max(1, count)) * Math.PI * 2;
-    const radius = count === 1 ? 0 : 31;
-    const x = 50 + Math.cos(angle) * radius;
-    const y = 50 + Math.sin(angle) * radius;
+function renderStudentGrid(groups) {
+  clusterPlane.innerHTML = '';
+  clusterPlane.classList.add('student-grid-view');
 
-    const clusterButton = document.createElement('button');
-    clusterButton.type = 'button';
-    clusterButton.className = 'cluster';
-    clusterButton.style.left = `${x}%`;
-    clusterButton.style.top = `${y}%`;
-    clusterButton.setAttribute('aria-label', `Open ${groupName} cluster`);
+  groups.forEach(([groupName, items]) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'student-tile';
+    card.setAttribute('aria-label', `Open ${groupName}`);
 
-    const preview = document.createElement('div');
-    preview.className = 'cluster-preview';
-    orderedItems(items).slice(0, 4).forEach((scan, previewIndex) => {
-      const thumb = document.createElement('img');
-      setImageSource(thumb, scan);
-      thumb.alt = `${scan.student} ${scan.assignment}`;
-      thumb.style.setProperty('--stack-offset', `${previewIndex * 8}px`);
-      preview.appendChild(thumb);
-    });
+    const name = document.createElement('h3');
+    name.textContent = groupName;
 
-    const title = document.createElement('h3');
-    title.textContent = groupName;
-    const meta = document.createElement('p');
-    meta.textContent = `${items.length} work samples`;
+    const count = document.createElement('p');
+    count.textContent = `${items.length} work samples`;
 
-    clusterButton.append(preview, title, meta);
-    clusterButton.addEventListener('click', () => {
+    const meter = document.createElement('div');
+    meter.className = 'sample-meter';
+    const maxBars = Math.min(10, Math.max(...groups.map(([, groupItems]) => groupItems.length)));
+    const activeBars = Math.max(1, Math.round((items.length / maxBars) * 10));
+    for (let i = 0; i < 10; i += 1) {
+      const dot = document.createElement('span');
+      dot.className = i < activeBars ? 'on' : '';
+      meter.appendChild(dot);
+    }
+
+    card.append(name, count, meter);
+    card.addEventListener('click', () => {
       state.viewMode = 'rows';
       state.activeCluster = groupName;
       render();
     });
 
-    clusterPlane.appendChild(clusterButton);
+    clusterPlane.appendChild(card);
   });
+}
+
+function assignmentBucket(daysAgo) {
+  if (daysAgo <= 0) return 'Today';
+  if (daysAgo <= 7) return '1-7 days ago';
+  if (daysAgo <= 30) return '8-30 days ago';
+  return '31+ days ago (school year)';
+}
+
+function renderAssignmentTimeline(groups) {
+  clusterPlane.innerHTML = '';
+  clusterPlane.classList.add('assignment-timeline-view');
+
+  const timelineOrder = ['Today', '1-7 days ago', '8-30 days ago', '31+ days ago (school year)'];
+  const lanes = new Map(timelineOrder.map((label) => [label, []]));
+  const now = new Date();
+
+  groups.forEach(([groupName, items]) => {
+    const latestCapture = items.reduce((latest, scan) => {
+      const at = new Date(scan.capturedAt);
+      return at > latest ? at : latest;
+    }, new Date(0));
+
+    const elapsedMs = now - latestCapture;
+    const daysAgo = Math.floor(elapsedMs / (1000 * 60 * 60 * 24));
+    const lane = assignmentBucket(daysAgo);
+    lanes.get(lane).push({ groupName, items, daysAgo });
+  });
+
+  timelineOrder.forEach((lane) => {
+    const laneSection = document.createElement('section');
+    laneSection.className = 'timeline-lane';
+
+    const laneTitle = document.createElement('h3');
+    laneTitle.textContent = lane;
+
+    const laneTrack = document.createElement('div');
+    laneTrack.className = 'timeline-track';
+
+    lanes.get(lane).forEach(({ groupName, items, daysAgo }) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'timeline-chip';
+
+      const title = document.createElement('h4');
+      title.textContent = groupName;
+      const details = document.createElement('p');
+      details.textContent = `${items.length} samples · ${Math.max(daysAgo, 0)}d ago`;
+
+      chip.append(title, details);
+      chip.addEventListener('click', () => {
+        state.viewMode = 'rows';
+        state.activeCluster = groupName;
+        render();
+      });
+
+      laneTrack.appendChild(chip);
+    });
+
+    laneSection.append(laneTitle, laneTrack);
+    clusterPlane.appendChild(laneSection);
+  });
+}
+
+function renderConceptClusters(groups) {
+  clusterPlane.innerHTML = '';
+  clusterPlane.classList.add('kmeans-view');
+
+  const count = groups.length;
+  groups.forEach(([groupName, items], index) => {
+    const angle = (index / Math.max(1, count)) * Math.PI * 2;
+    const radius = count === 1 ? 0 : 30;
+    const centerX = 50 + Math.cos(angle) * radius;
+    const centerY = 50 + Math.sin(angle) * radius;
+
+    const blob = document.createElement('div');
+    blob.className = 'cluster-blob';
+    blob.style.left = `${centerX}%`;
+    blob.style.top = `${centerY}%`;
+
+    const centroid = document.createElement('button');
+    centroid.type = 'button';
+    centroid.className = 'cluster-centroid';
+    centroid.style.left = `${centerX}%`;
+    centroid.style.top = `${centerY}%`;
+    centroid.setAttribute('aria-label', `Open ${groupName}`);
+
+    const title = document.createElement('h3');
+    title.textContent = groupName;
+    const meta = document.createElement('p');
+    meta.textContent = `${items.length} samples`;
+    centroid.append(title, meta);
+
+    centroid.addEventListener('click', () => {
+      state.viewMode = 'rows';
+      state.activeCluster = groupName;
+      render();
+    });
+
+    clusterPlane.append(blob, centroid);
+  });
+}
+
+function renderOverview(groups) {
+  clusterPlane.classList.remove('student-grid-view', 'assignment-timeline-view', 'kmeans-view');
+  applyBackdropTheme();
+
+  if (state.sortKey === 'student') {
+    renderStudentGrid(groups);
+    return;
+  }
+
+  if (state.sortKey === 'assignment') {
+    renderAssignmentTimeline(groups);
+    return;
+  }
+
+  renderConceptClusters(groups);
 }
 
 function renderRows(groups) {
@@ -225,6 +361,7 @@ function renderRows(groups) {
 function render() {
   const groups = groupScans();
   updateSummary(groups);
+
   if (!groups.length) {
     clusterPlane.textContent = 'No captures available.';
     gallery.textContent = '';
@@ -235,7 +372,7 @@ function render() {
     state.activeCluster = groups[0][0];
   }
 
-  renderClusterPlane(groups);
+  renderOverview(groups);
   renderRows(groups);
   updateViewControls();
 }
