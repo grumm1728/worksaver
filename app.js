@@ -77,7 +77,12 @@ const stickerButtons = document.getElementById('stickerButtons');
 const undoTag = document.getElementById('undoTag');
 const toast = document.getElementById('toast');
 
+function on(element, eventName, handler) {
+  if (element) element.addEventListener(eventName, handler);
+}
+
 function showToast(message) {
+  if (!toast) return;
   toast.textContent = message;
   toast.hidden = false;
   clearTimeout(showToast.timer);
@@ -146,6 +151,7 @@ function setTourStepComplete(index, value = true) {
 }
 
 function renderTour() {
+  if (!tourChecklist) return;
   tourChecklist.textContent = '';
   tourSteps.forEach((step, index) => {
     const item = document.createElement('li');
@@ -434,6 +440,7 @@ function updateInsights() {
 }
 
 function renderStickerButtons() {
+  if (!stickerButtons) return;
   stickerButtons.textContent = '';
   Object.keys(misconceptionTemplates).forEach((name) => {
     const btn = document.createElement('button');
@@ -449,6 +456,12 @@ function renderStickerButtons() {
 }
 
 function render() {
+  const requiredNodes = [summary, emptyState, viewControls, sidePanels, clusterPlane, groupBySelect];
+  if (requiredNodes.some((node) => !node)) {
+    console.error('WorkSaver UI failed to initialize: expected DOM nodes are missing. Ensure GitHub Pages is serving latest index.html.');
+    return;
+  }
+
   const groups = groupScans();
   updateHeaderAndEmptyState(groups);
   updateViewHint();
@@ -500,32 +513,32 @@ function resetAll() {
   render();
 }
 
-loadDemoBtn.addEventListener('click', loadDemoData);
-tryDemoBtn.addEventListener('click', loadDemoData);
-resetBtn.addEventListener('click', resetAll);
+on(loadDemoBtn, 'click', loadDemoData);
+on(tryDemoBtn, 'click', loadDemoData);
+on(resetBtn, 'click', resetAll);
 
-groupBySelect.addEventListener('change', () => {
+on(groupBySelect, 'change', () => {
   state.sortKey = groupBySelect.value;
   state.activeCluster = null;
-  if (groupModal.open) groupModal.close();
+  if (groupModal?.open) groupModal.close();
   render();
 });
 
-shuffleToggle.addEventListener('change', () => {
+on(shuffleToggle, 'change', () => {
   state.shuffle = shuffleToggle.checked;
-  if (groupModal.open) renderGroupModal();
+  if (groupModal?.open) renderGroupModal();
   render();
 });
 
-closeGroupModal.addEventListener('click', () => groupModal.close());
-closeModal.addEventListener('click', () => focusModal.close());
+on(closeGroupModal, 'click', () => groupModal?.close());
+on(closeModal, 'click', () => focusModal?.close());
 
-groupModal.addEventListener('close', () => {
+on(groupModal, 'close', () => {
   state.activeCluster = null;
   render();
 });
 
-metaForm.addEventListener('submit', (event) => {
+on(metaForm, 'submit', (event) => {
   event.preventDefault();
   const scan = selectedScan();
   if (!scan) return;
@@ -541,7 +554,7 @@ metaForm.addEventListener('submit', (event) => {
   showToast('Metadata saved.');
 });
 
-imageCanvas.addEventListener('pointerdown', (event) => {
+on(imageCanvas, 'pointerdown', (event) => {
   const scan = selectedScan();
   if (!scan || !state.activeSticker) return;
 
@@ -564,7 +577,7 @@ imageCanvas.addEventListener('pointerdown', (event) => {
   showToast(`Tagged: ${tag.category}`);
 });
 
-undoTag.addEventListener('click', () => {
+on(undoTag, 'click', () => {
   const latest = state.tagHistory.pop();
   if (!latest) return;
 
@@ -584,18 +597,19 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-tourNext.addEventListener('click', () => {
+on(tourNext, 'click', () => {
   state.tourCompleted[state.tourActiveIndex] = true;
   const next = state.tourCompleted.findIndex((done) => !done);
   if (next >= 0) state.tourActiveIndex = next;
   renderTour();
 });
 
-tourSkip.addEventListener('click', () => {
-  document.querySelector('.tour-panel').hidden = true;
+on(tourSkip, 'click', () => {
+  const panel = document.querySelector('.tour-panel');
+  if (panel) panel.hidden = true;
 });
 
-createSmallGroupBtn.addEventListener('click', () => {
+on(createSmallGroupBtn, 'click', () => {
   state.smallGroupCreated = true;
   showToast('Small group created from current insight set.');
   updateTourFromState();
