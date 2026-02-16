@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WorkSaver (Prototype)</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>WorkSaver (Prototype)</h1>
+        <p class="value-prop">Explore how teachers can surface misconceptions in student work and turn them into next instructional moves.</p>
+        <p class="note">Prototype: interaction + workflow exploration (not production-ready)</p>
+      </div>
+      <div class="top-actions">
+        <button id="loadDemoBtn" class="primary">Load Demo Class (200 samples)</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="workspace">
+        <section class="controls">
+          <h2>Teacher decision filters</h2>
+          <label>
+            Group by
+            <select id="groupBySelect">
+              <option value="misconception">Misconception</option>
+              <option value="lessonObjective">Lesson / Objective</option>
+              <option value="standard">Standard</option>
+              <option value="assignment">Assignment</option>
+              <option value="student">Student</option>
+            </select>
+          </label>
+          <label class="shuffle-toggle">
+            <input type="checkbox" id="shuffleToggle" />
+            Shuffle order inside each group
+          </label>
+          <p class="summary" id="summary"></p>
+        </section>
+
+        <section class="empty-state" id="emptyState">
+          <div class="empty-art">📚✏️🧮</div>
+          <h3>Start with a demo class set</h3>
+          <p>Load realistic student work to explore clusters, tag misconceptions, and generate next-step instructional insights.</p>
+          <button id="tryDemoBtn" class="primary">Try demo</button>
+        </section>
+
+        <section class="view-controls" id="viewControls" hidden>
+          <p id="viewHint"></p>
+        </section>
+
+        <section id="clusterPlane" class="cluster-plane" hidden></section>
+      </section>
+
+      <aside class="side-panels" id="sidePanels" hidden>
+        <section class="panel tour-panel">
+          <h2>60-second tour</h2>
+          <ol id="tourChecklist"></ol>
+          <div class="tour-actions">
+            <button id="tourNext">Next</button>
+            <button id="tourSkip" class="secondary">Skip</button>
+          </div>
+        </section>
+
+        <section class="panel insights-panel">
+          <h2>Instructional insights</h2>
+          <p id="insightTop">Top misconception this set: —</p>
+          <p id="insightMove">Suggested next move: —</p>
+          <div>
+            <h3>Students to pull</h3>
+            <ul id="insightStudents"></ul>
+          </div>
+          <p id="insightGroup">Suggested grouping: —</p>
+          <button id="createSmallGroupBtn">Create small group</button>
+          <a id="exportGroupCsv" href="#" download="small-group.csv">Export small group CSV</a>
+          <label class="reteach-note">
+            Tomorrow's re-teach note
+            <textarea id="reteachNote" rows="4"></textarea>
+          </label>
+        </section>
+      </aside>
+    </main>
+
+    <dialog id="groupModal" class="group-modal">
+      <article>
+        <button id="closeGroupModal" class="close">✕</button>
+        <header class="group-modal-header">
+          <h2 id="groupModalTitle">Group</h2>
+          <p id="groupModalMeta"></p>
+        </header>
+        <section id="groupGallery" class="group-grid"></section>
+      </article>
+    </dialog>
+
+    <dialog id="focusModal" class="focus-modal">
+      <article>
+        <button id="closeModal" class="close">✕</button>
+        <div class="focus-layout">
+          <div class="image-panel">
+            <div id="imageCanvas" class="image-canvas">
+              <img id="focusImage" alt="Student work" />
+              <div id="annotationLayer" class="annotation-layer"></div>
+            </div>
+          </div>
+          <div class="tools-panel">
+            <h3>Metadata editor</h3>
+            <form id="metaForm" class="meta-form">
+              <label>
+                Student
+                <input name="student" required />
+              </label>
+              <label>
+                Assignment
+                <input name="assignment" required />
+              </label>
+              <label>
+                Lesson / Objective
+                <input name="lessonObjective" required />
+              </label>
+              <label>
+                Standard
+                <input name="standard" required />
+              </label>
+              <label>
+                Captured at
+                <input name="capturedAt" type="datetime-local" required />
+              </label>
+              <button type="submit">Save metadata</button>
+            </form>
+
+            <h3>Misconception stickers</h3>
+            <div class="tool-buttons" id="stickerButtons"></div>
+            <button id="undoTag" type="button" class="secondary">Undo last tag</button>
+          </div>
+        </div>
+      </article>
+    </dialog>
+
+    <template id="cardTemplate">
+      <article class="work-card">
+        <button class="card-button">
+          <img alt="student submission thumbnail" />
+          <div class="card-details">
+            <h4 class="student"></h4>
+            <p class="assignment"></p>
+            <p class="objective"></p>
+            <p class="standard"></p>
+            <p class="date"></p>
+          </div>
+        </button>
+      </article>
+    </template>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="demoData.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
