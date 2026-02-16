@@ -308,6 +308,36 @@ button.secondary {
   margin-top: 0.2rem;
 }
 
+
+.group-modal {
+  width: min(1200px, 95vw);
+  max-height: 90vh;
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+}
+
+.group-modal::backdrop {
+  background: rgb(15 23 42 / 0.48);
+}
+
+.group-modal article {
+  position: relative;
+  background: #fff;
+  padding: 1rem;
+}
+
+.group-modal-header h2,
+.group-modal-header p {
+  margin: 0;
+}
+
+.group-modal-header p {
+  margin-top: 0.25rem;
+  color: #586178;
+  font-size: 0.92rem;
+}
+
 .focus-modal {
   width: min(1200px, 95vw);
   max-height: 92vh;
