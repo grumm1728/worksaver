@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WorkSaver (Prototype)</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>WorkSaver (Prototype)</h1>
+        <p class="value-prop">Explore how teachers can surface misconceptions in student work and turn them into next instructional moves.</p>
+        <p class="note">Prototype: interaction + workflow exploration (not production-ready)</p>
+      </div>
+      <div class="top-actions">
+        <button id="loadDemoBtn" class="primary">Load demo class</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="workspace">
+        <section class="controls">
+          <div>
+            <h2>Group by</h2>
+            <div id="groupTabs" class="group-tabs" role="tablist" aria-label="Group by tabs">
+              <button type="button" data-group="student" role="tab"><span class="tab-icon">👥</span>Student</button>
+              <button type="button" data-group="assignment" role="tab"><span class="tab-icon">🪑</span>Assignment</button>
+              <button type="button" data-group="lessonObjective" role="tab"><span class="tab-icon">🧩</span>Lesson / Objective</button>
+              <button type="button" data-group="topic" role="tab"><span class="tab-icon">🧮</span>Topic</button>
+              <button type="button" data-group="standard" role="tab"><span class="tab-icon">🧪</span>Standard</button>
+              <button type="button" data-group="misconception" role="tab" class="active"><span class="tab-icon">🏷️</span>Misconception</button>
+            </div>
+          </div>
+
+          <div class="control-actions">
+            <button id="beginSprintBtn" class="primary">Begin sprint</button>
+            <label class="shuffle-toggle">
+              <input type="checkbox" id="shuffleToggle" />
+              Shuffle order inside each group
+            </label>
+          </div>
+
+          
+
+          <p class="summary" id="summary"></p>
+        </section>
+
+        <section class="empty-state" id="emptyState">
+          <div class="empty-art">📚✏️🧮</div>
+          <h3>Load demo class to begin</h3>
+          <p>Use the top-right button to load 200 Skyline Express samples and complete a fast teacher decision loop.</p>
+        </section>
+
+        <section class="view-controls" id="viewControls" hidden>
+          <p id="viewHint"></p>
+        </section>
+
+        <section id="clusterPlane" class="cluster-plane" hidden></section>
+      </section>
+
+      <aside class="side-panels" id="sidePanels" hidden>
+        <section class="panel tour-panel">
+          <h2>60-second tour</h2>
+          <ol id="tourChecklist"></ol>
+          <div class="tour-actions">
+            <button id="tourNext">Next</button>
+            <button id="tourSkip" class="secondary">Skip</button>
+          </div>
+        </section>
+
+        <section class="panel insights-panel">
+          <h2>Instructional insights</h2>
+          <p id="insightTop">Top misconception this set: —</p>
+          <p id="insightMove">Suggested next move: —</p>
+          <div>
+            <h3>Students to pull</h3>
+            <ul id="insightStudents"></ul>
+          </div>
+          <p id="insightGroup">Suggested grouping: —</p>
+          <button id="createSmallGroupBtn">Create small group</button>
+          <a id="exportGroupCsv" href="#" download="small-group.csv">Export small group CSV</a>
+          <label class="reteach-note">
+            Tomorrow's re-teach note
+            <textarea id="reteachNote" rows="4"></textarea>
+          </label>
+        </section>
+      </aside>
+    </main>
+
+    <dialog id="groupModal" class="group-modal">
+      <article>
+        <button id="closeGroupModal" class="close">✕</button>
+        <header class="group-modal-header">
+          <h2 id="groupModalTitle">Group</h2>
+          <p id="groupModalMeta"></p>
+          <div id="groupStickerSummary" class="group-sticker-summary"></div>
+        </header>
+        <section id="groupGallery" class="group-grid"></section>
+      </article>
+    </dialog>
+
+    <dialog id="focusModal" class="focus-modal">
+      <article>
+        <button id="closeModal" class="close">✕</button>
+        <div id="sprintBanner" class="sprint-banner" hidden>
+          <strong id="sprintCounter">Sprint: 0 / 5</strong>
+          <span id="sprintDateLabel"></span>
+          <button id="sprintDoneBtn" class="primary">Done with this sample</button>
+          <button id="stopSprintBtn" class="secondary">Stop sprint</button>
+        </div>
+        <div class="focus-layout">
+          <div class="image-panel">
+            <div id="imageCanvas" class="image-canvas">
+              <img id="focusImage" alt="Student work" />
+              <div id="annotationLayer" class="annotation-layer"></div>
+            </div>
+          </div>
+          <div class="tools-panel">
+            <h3>Metadata editor</h3>
+            <form id="metaForm" class="meta-form">
+              <label>Student<input name="student" required /></label>
+              <label>Assignment<input name="assignment" required /></label>
+              <label>Lesson / Objective<input name="lessonObjective" required /></label>
+              <label>Standard<input name="standard" required /></label>
+              <label>Topic<input name="topic" required /></label>
+              <label>Captured at<input name="capturedAt" type="datetime-local" required /></label>
+              <button type="submit">Save metadata</button>
+            </form>
+
+            <h3>Misconception & praise stickers</h3>
+            <div class="tool-buttons" id="stickerButtons"></div>
+            <button id="undoTag" type="button" class="secondary">Undo last tag</button>
+          </div>
+        </div>
+      </article>
+    </dialog>
+
+    <dialog id="sprintCompleteModal" class="tiny-modal">
+      <article>
+        <h3>Nice sprint! Do more?</h3>
+        <p>You finished 5 samples. Keep momentum or close sprint mode.</p>
+        <div class="tiny-actions">
+          <button id="sprintDoMore" class="primary">Do 5 more</button>
+          <button id="sprintClose" class="secondary">Close</button>
+        </div>
+      </article>
+    </dialog>
+
+    <dialog id="sprintEdgeModal" class="tiny-modal">
+      <article>
+        <h3>Not enough uncompleted samples</h3>
+        <p id="sprintEdgeText">You have fewer samples left than the sprint target.</p>
+        <div class="tiny-actions">
+          <button id="sprintResetProgress" class="primary">Reset sprint progress</button>
+          <button id="sprintEdgeClose" class="secondary">Close</button>
+        </div>
+      </article>
+    </dialog>
+
+    <template id="cardTemplate">
+      <article class="work-card">
+        <button class="card-button">
+          <img alt="student submission thumbnail" />
+          <div class="card-details">
+            <h4 class="student"></h4>
+            <p class="assignment"></p>
+            <p class="objective"></p>
+            <p class="standard"></p>
+            <p class="date"></p>
+          </div>
+        </button>
+      </article>
+    </template>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="demoData.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
