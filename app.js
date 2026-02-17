@@ -531,6 +531,7 @@ function render() {
 
 function setGrouping(groupKey) {
   state.sortKey = groupKey;
+  groupBySelect.value = groupKey;
   state.activeCluster = null;
   if (groupModal.open) groupModal.close();
   render();
