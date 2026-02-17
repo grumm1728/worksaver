@@ -208,7 +208,12 @@ function updateTourFromState() {
 
 function setActiveTabVisual() {
   if (!groupTabs) return;
-  [...groupTabs.querySelectorAll('button[data-group]')].forEach((btn) => btn.classList.toggle('active', btn.dataset.group === state.sortKey));
+  [...groupTabs.querySelectorAll('button[data-group]')].forEach((btn) => {
+    const isActive = btn.dataset.group === state.sortKey;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-selected', String(isActive));
+    btn.setAttribute('tabindex', isActive ? '0' : '-1');
+  });
 }
 
 function updateHeaderAndEmptyState(groups) {
@@ -531,7 +536,6 @@ function render() {
 
 function setGrouping(groupKey) {
   state.sortKey = groupKey;
-  groupBySelect.value = groupKey;
   state.activeCluster = null;
   if (groupModal.open) groupModal.close();
   render();
@@ -557,6 +561,7 @@ function loadDemoData() {
 function resetAll() {
   state.scans = [];
   state.sortKey = 'misconception';
+  state.shuffle = false;
   state.selectedId = null;
   state.activeCluster = null;
   state.activeSticker = null;
@@ -569,6 +574,7 @@ function resetAll() {
 
   loadDemoBtn.disabled = false;
   loadDemoBtn.textContent = 'Load demo class';
+  if (shuffleToggle) shuffleToggle.checked = false;
 
   if (groupModal.open) groupModal.close();
   if (focusModal.open) focusModal.close();
@@ -655,12 +661,6 @@ on(groupTabs, 'click', (event) => {
   if (!btn) return;
   setGrouping(btn.dataset.group);
 });
-
-if (groupTabs) {
-  groupTabs.querySelectorAll('button[data-group]').forEach((button) => {
-    on(button, 'click', () => setGrouping(button.dataset.group));
-  });
-}
 
 on(shuffleToggle, 'change', () => {
   state.shuffle = shuffleToggle.checked;
