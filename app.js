@@ -47,7 +47,6 @@ const loadDemoBtn = document.getElementById('loadDemoBtn');
 const resetBtn = document.getElementById('resetBtn');
 const beginSprintBtn = document.getElementById('beginSprintBtn');
 const groupTabs = document.getElementById('groupTabs');
-const groupBySelect = document.getElementById('groupBySelect');
 const shuffleToggle = document.getElementById('shuffleToggle');
 const summary = document.getElementById('summary');
 const viewHint = document.getElementById('viewHint');
@@ -505,7 +504,7 @@ function renderStickerButtons() {
 }
 
 function render() {
-  const required = [summary, emptyState, viewControls, sidePanels, clusterPlane, groupBySelect];
+  const required = [summary, emptyState, viewControls, sidePanels, clusterPlane, groupTabs];
   if (required.some((node) => !node)) return;
 
   const groups = groupScans();
@@ -657,7 +656,12 @@ on(groupTabs, 'click', (event) => {
   setGrouping(btn.dataset.group);
 });
 
-on(groupBySelect, 'change', () => setGrouping(groupBySelect.value));
+if (groupTabs) {
+  groupTabs.querySelectorAll('button[data-group]').forEach((button) => {
+    on(button, 'click', () => setGrouping(button.dataset.group));
+  });
+}
+
 on(shuffleToggle, 'change', () => {
   state.shuffle = shuffleToggle.checked;
   if (groupModal.open) renderGroupModal();

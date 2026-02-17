@@ -25,12 +25,12 @@
           <div>
             <h2>Group by</h2>
             <div id="groupTabs" class="group-tabs" role="tablist" aria-label="Group by tabs">
-              <button data-group="student" role="tab"><span class="tab-icon">👥</span>Student</button>
-              <button data-group="assignment" role="tab"><span class="tab-icon">🪑</span>Assignment</button>
-              <button data-group="lessonObjective" role="tab"><span class="tab-icon">🧩</span>Lesson / Objective</button>
-              <button data-group="topic" role="tab"><span class="tab-icon">🧮</span>Topic</button>
-              <button data-group="standard" role="tab"><span class="tab-icon">🧪</span>Standard</button>
-              <button data-group="misconception" role="tab" class="active"><span class="tab-icon">🏷️</span>Misconception</button>
+              <button type="button" data-group="student" role="tab"><span class="tab-icon">👥</span>Student</button>
+              <button type="button" data-group="assignment" role="tab"><span class="tab-icon">🪑</span>Assignment</button>
+              <button type="button" data-group="lessonObjective" role="tab"><span class="tab-icon">🧩</span>Lesson / Objective</button>
+              <button type="button" data-group="topic" role="tab"><span class="tab-icon">🧮</span>Topic</button>
+              <button type="button" data-group="standard" role="tab"><span class="tab-icon">🧪</span>Standard</button>
+              <button type="button" data-group="misconception" role="tab" class="active"><span class="tab-icon">🏷️</span>Misconception</button>
             </div>
           </div>
 
@@ -42,17 +42,7 @@
             </label>
           </div>
 
-          <label class="fallback-grouping">
-            Fallback dropdown
-            <select id="groupBySelect">
-              <option value="misconception" selected>Misconception</option>
-              <option value="lessonObjective">Lesson / Objective</option>
-              <option value="standard">Standard</option>
-              <option value="topic">Topic</option>
-              <option value="assignment">Assignment</option>
-              <option value="student">Student</option>
-            </select>
-          </label>
+          
 
           <p class="summary" id="summary"></p>
         </section>
