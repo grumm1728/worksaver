@@ -8,16 +8,16 @@ A prototype teacher web interface for reviewing student work and making instruct
 - Demo dataset realism (client-side, seeded):
   - 30 students, 8 assignments, 5 standards/objectives, 200 samples.
   - Skyline Express image set reused across samples with deterministic variation.
-  - Pre-applied sticker distribution with realistic skew (mostly 0–1 tags, fewer 2+, weighted misconception frequencies).
+  - Pre-applied sticker distribution with realistic skew (mostly 0–1 tags, fewer 2+, weighted sticker frequencies).
 - Salient primary grouping control via icon tabs:
-  - Student, Assignment, Lesson / Objective, Topic, Standard, Misconception.
+  - Student, Assignment, Lesson / Objective, Topic, Standard, Sticker.
 - Zoomed-out group cards include:
   - sample count,
   - dotmap microviz of group size,
   - top sticker summary pills.
 - Group modal includes aggregated sticker summaries and sample gallery.
 - Focus modal supports metadata edits and color-coded sticker tagging.
-- Instructional insights panel (rule-based): top misconception, suggested move, student list, suggested grouping, CSV export, and re-teach note.
+- Instructional insights panel (rule-based): top sticker, suggested move, student list, suggested grouping, CSV export, and re-teach note.
 - Guided 60-second tour checklist.
 - **Grading Shuffle Sprint** flow:
   - Begin sprint,

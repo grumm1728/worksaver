@@ -11,7 +11,7 @@
     { id: 'a3', name: 'Independent Practice Set A', lessonObjective: 'Add within 100 using place value', daysAgo: 18 },
     { id: 'a4', name: 'Math Talk Evidence Board', lessonObjective: 'Justify two-step reasoning', daysAgo: 12 },
     { id: 'a5', name: 'Exit Ticket - Regrouping', lessonObjective: 'Add with regrouping', daysAgo: 7 },
-    { id: 'a6', name: 'Error Analysis Sort', lessonObjective: 'Find and fix misconception patterns', daysAgo: 4 },
+    { id: 'a6', name: 'Error Analysis Sort', lessonObjective: 'Find and explain strategy patterns', daysAgo: 4 },
     { id: 'a7', name: 'Fluency Check', lessonObjective: 'Compute accurately under time constraints', daysAgo: 1 },
     { id: 'a8', name: 'Reflection Journal', lessonObjective: 'Show strategy and explain next steps', daysAgo: 0 }
   ];
@@ -43,11 +43,11 @@
   ];
 
   const stickerTypes = [
-    'Place value confusion',
-    'Regrouping error',
-    "Didn't show work",
-    'Great strategy',
-    'Answer-only'
+    'using structure well',
+    'applying a strategy',
+    'good error correction',
+    'solid explanation',
+    'neat diagram'
   ];
 
   function seededRandom(seed) {
@@ -61,11 +61,11 @@
 
   function weightedSticker(rand) {
     const n = rand();
-    if (n < 0.34) return 'Regrouping error';
-    if (n < 0.59) return 'Place value confusion';
-    if (n < 0.75) return "Didn't show work";
-    if (n < 0.9) return 'Answer-only';
-    return 'Great strategy';
+    if (n < 0.34) return 'applying a strategy';
+    if (n < 0.59) return 'using structure well';
+    if (n < 0.75) return 'good error correction';
+    if (n < 0.9) return 'solid explanation';
+    return 'neat diagram';
   }
 
   function tagCount(rand) {

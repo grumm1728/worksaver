@@ -1,13 +1,13 @@
 const stickerConfig = {
-  'Place value confusion': { color: '#f97316', kind: 'misconception', suggestion: 'Use base-ten blocks and compare two worked examples to reinforce quantity meaning.' },
-  'Regrouping error': { color: '#ef4444', kind: 'misconception', suggestion: 'Pull a small group for a quick re-teach with number-bond regrouping steps.' },
-  "Didn't show work": { color: '#f59e0b', kind: 'misconception', suggestion: 'Model sentence frames and require one equation + one explanation line before checking answers.' },
-  'Answer-only': { color: '#a855f7', kind: 'misconception', suggestion: 'Prompt students to annotate each step and highlight where each number came from.' },
-  'Great strategy': { color: '#10b981', kind: 'praise', suggestion: 'Use this work as a peer exemplar and ask the student to explain the strategy aloud.' }
+  'using structure well': { color: '#0ea5e9', kind: 'strength', suggestion: 'Have students name what structure they noticed and why it helped.' },
+  'applying a strategy': { color: '#8b5cf6', kind: 'strength', suggestion: 'Ask students to compare this strategy with one alternate method.' },
+  'good error correction': { color: '#f59e0b', kind: 'strength', suggestion: 'Celebrate revision moves and ask students to explain how they caught the error.' },
+  'solid explanation': { color: '#10b981', kind: 'strength', suggestion: 'Use this sample as an exemplar for sentence stems and math reasoning.' },
+  'neat diagram': { color: '#f97316', kind: 'strength', suggestion: 'Highlight how visual organization supports clear thinking and communication.' }
 };
 
 const labels = {
-  misconception: 'Misconception',
+  misconception: 'Sticker',
   lessonObjective: 'Lesson / Objective',
   standard: 'Standard',
   topic: 'Topic',
@@ -18,7 +18,7 @@ const labels = {
 const tourSteps = [
   'Click “Load demo class”.',
   'Click a group in the cluster view.',
-  'Place the “Regrouping error” sticker on 3 samples.',
+  'Place the “applying a strategy” sticker on 3 samples.',
   'Observe “Instructional insights” updating.',
   'Click “Create small group”.'
 ];
@@ -139,13 +139,13 @@ function orderedItems(items) {
   return state.shuffle ? shuffleCopy(items) : [...items].sort((a, b) => new Date(b.capturedAt) - new Date(a.capturedAt));
 }
 
-function primaryMisconception(scan) {
-  const tag = (scan.annotations || []).find((item) => item.type === 'tag' && stickerConfig[item.category]?.kind !== 'praise');
+function primarySticker(scan) {
+  const tag = (scan.annotations || []).find((item) => item.type === 'tag');
   return tag ? tag.category : 'Untagged';
 }
 
 function groupValue(scan) {
-  if (state.sortKey === 'misconception') return primaryMisconception(scan);
+  if (state.sortKey === 'misconception') return primarySticker(scan);
   return scan[state.sortKey] || 'Unknown';
 }
 
@@ -200,8 +200,8 @@ function renderTour() {
 function updateTourFromState() {
   if (state.demoLoaded) setTourStepComplete(0);
   if (groupModal.open) setTourStepComplete(1);
-  const regroupingCount = state.scans.flatMap((scan) => scan.annotations || []).filter((item) => item.type === 'tag' && item.category === 'Regrouping error').length;
-  if (regroupingCount >= 3) setTourStepComplete(2);
+  const strategyCount = state.scans.flatMap((scan) => scan.annotations || []).filter((item) => item.type === 'tag' && item.category === 'applying a strategy').length;
+  if (strategyCount >= 3) setTourStepComplete(2);
   if (Object.keys(countStickers(state.scans)).length > 0) setTourStepComplete(3);
   if (state.smallGroupCreated) setTourStepComplete(4);
 }
@@ -230,9 +230,9 @@ function updateViewHint() {
     student: 'Student board view: alphabetic group cards with sample count + dotmap.',
     assignment: 'Assignment timeline: click a lane chip to review that assignment set.',
     lessonObjective: 'Lesson objective clusters: click any cluster to inspect and tag.',
-    standard: 'Standard clusters: surface where misconceptions cluster by standard.',
-    topic: 'Topic clusters: scan quickly for patterns in misconceptions and strategies.',
-    misconception: 'Misconception clusters: quickly move from errors to small-group decisions.'
+    standard: 'Standard clusters: surface where strong work patterns cluster by standard.',
+    topic: 'Topic clusters: scan quickly for patterns in student strengths and strategies.',
+    misconception: 'Sticker clusters: quickly spot strengths and plan next moves.'
   };
   viewHint.textContent = text[state.sortKey] || '';
 }
@@ -457,10 +457,10 @@ function openFocus(scanId) {
 function updateInsights() {
   const set = currentSetForInsights();
   const tags = set.flatMap((scan) => (scan.annotations || []).filter((item) => item.type === 'tag').map((item) => ({ ...item, student: scan.student })));
-  const misconceptionTags = tags.filter((tag) => stickerConfig[tag.category]?.kind !== 'praise');
+  const stickerTags = tags;
 
-  if (!misconceptionTags.length) {
-    insightTop.textContent = 'Top misconception this set: —';
+  if (!stickerTags.length) {
+    insightTop.textContent = 'Top sticker this set: —';
     insightMove.textContent = 'Suggested next move: Tag 3+ samples to generate an instructional move.';
     insightStudents.textContent = '';
     insightGroup.textContent = 'Suggested grouping: —';
@@ -469,15 +469,15 @@ function updateInsights() {
     return;
   }
 
-  const counts = misconceptionTags.reduce((acc, tag) => {
+  const counts = stickerTags.reduce((acc, tag) => {
     acc[tag.category] = (acc[tag.category] || 0) + 1;
     return acc;
   }, {});
 
   const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-  const studentList = [...new Set(misconceptionTags.filter((tag) => tag.category === top).map((tag) => tag.student))];
+  const studentList = [...new Set(stickerTags.filter((tag) => tag.category === top).map((tag) => tag.student))];
 
-  insightTop.textContent = `Top misconception this set: ${top}`;
+  insightTop.textContent = `Top sticker this set: ${top}`;
   insightMove.textContent = `Suggested next move: ${stickerConfig[top].suggestion}`;
   insightStudents.textContent = '';
   studentList.forEach((name) => {
