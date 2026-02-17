@@ -4,23 +4,27 @@ A prototype teacher web interface for reviewing student work and making instruct
 
 ## Features
 
-- Value-first onboarding with a clear teacher-decision framing and one-click **Load Demo Class (200 samples)**.
-- Empty-state landing with **Try demo** CTA and a full client-side demo dataset.
-- Filtered overview modes for teacher workflows:
-  - Student (bulletin-board style grid)
-  - Assignment (timeline lanes)
-  - Lesson / Objective, Standard, and Misconception (cluster map)
-- Click any group to open a **modal gallery** of work samples.
-- Focus mode for a single sample with metadata editing, including **Lesson / Objective**.
-- 5 misconception/strength stickers:
-  - Place value confusion
-  - Regrouping error
-  - Didn't show work
-  - Great strategy
-  - Answer-only
-- Real-time **Instructional insights** panel (rule-based): top misconception, suggested next move, student list, grouping suggestion, export CSV, and re-teach note.
-- Guided **60-second tour** checklist that walks reviewers through the decision loop.
-- Tagging polish with toast feedback and undo support (button + Ctrl/Cmd+Z).
+- One-click onboarding with **Load demo class** and success state (`Demo loaded ✓`).
+- Demo dataset realism (client-side, seeded):
+  - 30 students, 8 assignments, 5 standards/objectives, 200 samples.
+  - Skyline Express image set reused across samples with deterministic variation.
+  - Pre-applied sticker distribution with realistic skew (mostly 0–1 tags, fewer 2+, weighted misconception frequencies).
+- Salient primary grouping control via icon tabs:
+  - Student, Assignment, Lesson / Objective, Topic, Standard, Misconception.
+- Zoomed-out group cards include:
+  - sample count,
+  - dotmap microviz of group size,
+  - top sticker summary pills.
+- Group modal includes aggregated sticker summaries and sample gallery.
+- Focus modal supports metadata edits and color-coded sticker tagging.
+- Instructional insights panel (rule-based): top misconception, suggested move, student list, suggested grouping, CSV export, and re-teach note.
+- Guided 60-second tour checklist.
+- **Grading Shuffle Sprint** flow:
+  - Begin sprint,
+  - random sample sequence,
+  - “Done with this sample” progression,
+  - 5-sample completion prompt (“Do 5 more” / “Close”),
+  - graceful edge handling and sprint progress reset option.
 
 ## Run locally
 

@@ -24,7 +24,9 @@
     'Model with equations'
   ];
 
-  const providedWorkSampleFiles = [
+  const topics = ['Place Value', 'Addition Strategies', 'Error Analysis', 'Reasoning and Proof', 'Fluency'];
+
+  const skylineImages = [
     'photo 1.JPG',
     'photo 1a.JPG',
     'photo 1b.JPG',
@@ -40,6 +42,14 @@
     'photo 5a.JPG'
   ];
 
+  const stickerTypes = [
+    'Place value confusion',
+    'Regrouping error',
+    "Didn't show work",
+    'Great strategy',
+    'Answer-only'
+  ];
+
   function seededRandom(seed) {
     let value = seed % 2147483647;
     if (value <= 0) value += 2147483646;
@@ -49,25 +59,51 @@
     };
   }
 
-  function svgThumbnail(label, variant) {
-    const colors = ['#dbeafe', '#fef3c7', '#dcfce7', '#ede9fe', '#fee2e2'];
-    const accent = colors[variant % colors.length];
-    const lineA = 24 + (variant % 5) * 12;
-    const lineB = 40 + (variant % 6) * 10;
+  function weightedSticker(rand) {
+    const n = rand();
+    if (n < 0.34) return 'Regrouping error';
+    if (n < 0.59) return 'Place value confusion';
+    if (n < 0.75) return "Didn't show work";
+    if (n < 0.9) return 'Answer-only';
+    return 'Great strategy';
+  }
+
+  function tagCount(rand) {
+    const n = rand();
+    if (n < 0.56) return 0;
+    if (n < 0.88) return 1;
+    if (n < 0.97) return 2;
+    return 3;
+  }
+
+  function svgFallback(label, variant) {
+    const hue = 200 + (variant % 120);
     const svg = `
       <svg xmlns='http://www.w3.org/2000/svg' width='640' height='430' viewBox='0 0 640 430'>
-        <rect width='640' height='430' fill='${accent}'/>
-        <rect x='28' y='22' width='584' height='386' rx='14' fill='white' stroke='#94a3b8' />
-        <text x='54' y='72' font-size='24' fill='#1e293b' font-family='Arial'>${label}</text>
-        <line x1='54' y1='${lineA + 84}' x2='560' y2='${lineA + 84}' stroke='#64748b' stroke-width='3'/>
-        <line x1='54' y1='${lineB + 120}' x2='510' y2='${lineB + 120}' stroke='#64748b' stroke-width='3'/>
-        <line x1='54' y1='${lineA + 160}' x2='582' y2='${lineA + 160}' stroke='#64748b' stroke-width='3'/>
-        <rect x='54' y='300' width='130' height='72' fill='none' stroke='#334155' stroke-width='3'/>
-        <rect x='188' y='300' width='150' height='72' fill='none' stroke='#334155' stroke-width='3'/>
-        <rect x='342' y='300' width='102' height='72' fill='none' stroke='#334155' stroke-width='3'/>
+        <rect width='640' height='430' fill='hsl(${hue} 50% 92%)'/>
+        <rect x='24' y='20' width='592' height='390' rx='14' fill='white' stroke='#94a3b8'/>
+        <text x='48' y='64' font-size='24' fill='#0f172a' font-family='Arial'>${label}</text>
+        <line x1='48' y1='112' x2='576' y2='112' stroke='#64748b' stroke-width='3'/>
+        <line x1='48' y1='154' x2='546' y2='154' stroke='#64748b' stroke-width='3'/>
+        <line x1='48' y1='196' x2='566' y2='196' stroke='#64748b' stroke-width='3'/>
       </svg>
     `;
     return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  }
+
+  function preseedTags(rand, idPrefix) {
+    const count = tagCount(rand);
+    const tags = [];
+    for (let i = 0; i < count; i += 1) {
+      tags.push({
+        id: `${idPrefix}-tag-${i + 1}`,
+        type: 'tag',
+        category: weightedSticker(rand),
+        x: 20 + rand() * 60,
+        y: 20 + rand() * 60
+      });
+    }
+    return tags;
   }
 
   function createDemoClassSet(sampleCount = 200) {
@@ -78,13 +114,14 @@
       const student = students[Math.floor(rand() * students.length)];
       const assignment = assignments[Math.floor(rand() * assignments.length)];
       const standard = standards[Math.floor(rand() * standards.length)];
-      const extraNoiseDays = Math.floor(rand() * 6);
+      const topic = topics[Math.floor(rand() * topics.length)];
+
       const date = new Date(now);
-      date.setDate(date.getDate() - assignment.daysAgo - extraNoiseDays);
+      date.setDate(date.getDate() - assignment.daysAgo - Math.floor(rand() * 7));
       date.setHours(8 + Math.floor(rand() * 8), Math.floor(rand() * 60), 0, 0);
 
-      const useProvided = index < providedWorkSampleFiles.length;
-      const imageUrl = useProvided ? providedWorkSampleFiles[index] : svgThumbnail(`${student.name} · ${assignment.name}`, index);
+      const isKeyExample = index < skylineImages.length;
+      const imageUrl = skylineImages[index % skylineImages.length];
 
       return {
         id: `scan-${index + 1}`,
@@ -94,18 +131,26 @@
         assignment: assignment.name,
         lessonObjective: assignment.lessonObjective,
         standard,
+        topic,
         capturedAt: date.toISOString().slice(0, 16),
         imageUrl,
-        fallbackImageUrl: svgThumbnail(`Fallback ${student.name}`, index + 1000),
-        isKeyExample: useProvided,
-        annotations: []
+        fallbackImageUrl: svgFallback(`${student.name} · ${assignment.name}`, index),
+        isKeyExample,
+        sprintDone: false,
+        annotations: preseedTags(rand, `scan-${index + 1}`)
       };
     });
 
-    return { scans, students, assignments, standards };
+    return {
+      unitName: 'Skyline Express Unit',
+      scans,
+      students,
+      assignments,
+      standards,
+      topics,
+      stickerTypes
+    };
   }
 
-  global.WorkSaverDemoData = {
-    createDemoClassSet
-  };
+  global.WorkSaverDemoData = { createDemoClassSet };
 })(window);
